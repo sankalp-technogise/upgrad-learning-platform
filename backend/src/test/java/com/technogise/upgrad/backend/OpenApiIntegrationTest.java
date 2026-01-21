@@ -11,6 +11,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 class OpenApiIntegrationTest {
 
     @LocalServerPort
@@ -19,19 +20,21 @@ class OpenApiIntegrationTest {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void shouldExposeOpenApiDocs() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
+        final HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:" + port + "/v3/api-docs"))
                 .GET()
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).contains("openapi");
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void shouldExposeSwaggerUi() throws Exception {
         // Swagger UI usually redirects, so we follow redirects or check the redirect
         // location
@@ -41,12 +44,12 @@ class OpenApiIntegrationTest {
         // springdoc-openapi-starter-webmvc-ui serves at /swagger-ui/index.html directly
         // too.
 
-        HttpRequest request = HttpRequest.newBuilder()
+        final HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:" + port + "/swagger-ui/index.html"))
                 .GET()
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).contains("swagger-ui");
