@@ -29,8 +29,7 @@ build-frontend:
 
 test-frontend:
 	@echo "Testing Frontend..."
-	# Assuming npm test exists, or use tsc for check
-	cd frontend && npm install && npm run build
+	cd frontend && npm install && npm run test
 
 run-frontend:
 	@echo "Starting Frontend..."
