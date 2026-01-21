@@ -1,2 +1,0 @@
-/Users/sakalpyerawar/Projects/technogise/upgrad-learning-platform/backend/build/classes/java/test/com/technogise/upgrad/backend/OpenApiIntegrationTest.class
-/Users/sakalpyerawar/Projects/technogise/upgrad-learning-platform/backend/build/classes/java/test/com/technogise/upgrad/backend/UpgradLearningBackendApplicationTests.class
