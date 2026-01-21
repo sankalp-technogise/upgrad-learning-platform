@@ -67,6 +67,13 @@ Monorepo structure containing a backend service and a web frontend.
 - **Decision**: PostgreSQL.
 - **Rationale**: Robust relational data handling for users and content metadata.
 
+### ADR-005: Static Code Analysis
+- **Decision**: Serverless static analysis using strict local tools.
+- **Backend Tools**: SpotBugs (Bytecode analysis) & PMD (Source analysis).
+- **Frontend Tools**: ESLint.
+- **Enforcement**: CI Pipeline MUST fail if violations are found.
+- **Rationale**: Zero-dependency analysis that runs entirely within the build pipeline without external servers. Validates both source patterns and compiled bytecode.
+
 ## 5. Security & Compliance
 - **Authentication**: JWT-based stateless auth.
 - **Privacy**: Minimal PII collection (Email only).

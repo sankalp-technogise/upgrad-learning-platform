@@ -6,6 +6,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class UpgradLearningBackendApplication {
 
+	/**
+	 * Main method to start the application.
+	 *
+	 * @param args command line arguments
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(UpgradLearningBackendApplication.class, args);
 	}
