@@ -129,29 +129,42 @@ export const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
 ### Using use-debounce Hook
 
 ```typescript
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
+// 1. Separate the component that fetches data
+const SearchResults: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
+    const { data } = useSuspenseQuery({
+        queryKey: ['search', searchTerm],
+        queryFn: () => api.search(searchTerm),
+    });
+
+    return <div>Found {data.length} results...</div>;
+};
+
+// 2. Parent handles state and conditional rendering
 export const SearchComponent: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
-
+    
     // Debounce for 300ms
     const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
-    // Query uses debounced value
-    const { data } = useSuspenseQuery({
-        queryKey: ['search', debouncedSearchTerm],
-        queryFn: () => api.search(debouncedSearchTerm),
-        enabled: debouncedSearchTerm.length > 0,
-    });
-
     return (
-        <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder='Search...'
-        />
+        <div>
+            <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder='Search...'
+            />
+            
+            {/* ✅ CORRECT - Only mount when we have a term */}
+            {debouncedSearchTerm.length > 0 && (
+                <Suspense fallback={<div>Searching...</div>}>
+                    <SearchResults searchTerm={debouncedSearchTerm} />
+                </Suspense>
+            )}
+        </div>
     );
 };
 ```
