@@ -10,4 +10,8 @@ class UpgradLearningBackendApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void main() {
+		UpgradLearningBackendApplication.main(new String[] {});
+	}
 }
