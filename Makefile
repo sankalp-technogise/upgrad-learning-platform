@@ -1,4 +1,4 @@
-.PHONY: build test clean run-backend run-frontend
+.PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down
 
 # Default target
 all: build
