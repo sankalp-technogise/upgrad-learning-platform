@@ -239,23 +239,35 @@ export const MyComponent: React.FC = () => {
 
 ```typescript
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
 
-export const MyComponent: React.FC = () => {
-    const { showError } = useMuiSnackbar();
-
+// 1. Component with Suspense Query
+const DataComponent: React.FC = () => {
     const { data } = useSuspenseQuery({
         queryKey: ['data'],
         queryFn: () => api.getData(),
-
-        // Handle errors
-        onError: (error) => {
-            showError('Failed to load data');
-            console.error('Query error:', error);
-        },
+        throwOnError: true, // Ensure errors are thrown to boundary
     });
 
     return <Content data={data} />;
+};
+
+// 2. Parent handles error with ErrorBoundary
+export const MyComponent: React.FC = () => {
+    const { showError } = useMuiSnackbar();
+
+    return (
+        <ErrorBoundary
+            fallbackRender={() => null}
+            onError={(error) => {
+                showError('Failed to load data');
+                console.error('Query error:', error);
+            }}
+        >
+            <DataComponent />
+        </ErrorBoundary>
+    );
 };
 ```
 

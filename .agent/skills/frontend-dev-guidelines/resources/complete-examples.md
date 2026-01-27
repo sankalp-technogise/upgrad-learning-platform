@@ -386,8 +386,8 @@ export const UserList: React.FC = () => {
 ```typescript
 import React from 'react';
 import { Box, TextField, Button, Paper } from '@mui/material';
-import { useBlog } from 'react-hook-blog';
-import { zodResolver } from '@hookblog/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '../api/userApi';
@@ -410,7 +410,7 @@ export const CreateUserBlog: React.FC<CreateUserBlogProps> = ({ onSuccess }) => 
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useMuiSnackbar();
 
-    const { register, handleSubmit, blogState: { errors }, reset } = useBlog<UserBlogData>({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<UserBlogData>({
         resolver: zodResolver(userSchema),
         defaultValues: {
             username: '',
@@ -441,7 +441,7 @@ export const CreateUserBlog: React.FC<CreateUserBlogProps> = ({ onSuccess }) => 
 
     return (
         <Paper sx={{ p: 3, maxWidth: 500 }}>
-            <blog onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                         {...register('username')}
@@ -479,12 +479,12 @@ export const CreateUserBlog: React.FC<CreateUserBlogProps> = ({ onSuccess }) => 
                     <Button
                         type='submit'
                         variant='contained'
-                        disabled={createMutation.isPending}
+                        disabled={createMutation.isLoading}
                     >
-                        {createMutation.isPending ? 'Creating...' : 'Create User'}
+                        {createMutation.isLoading ? 'Creating...' : 'Create User'}
                     </Button>
                 </Box>
-            </blog>
+            </form>
         </Paper>
     );
 };
