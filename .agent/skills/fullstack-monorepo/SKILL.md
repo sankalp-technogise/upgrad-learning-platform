@@ -10,6 +10,7 @@ model: opus
 ## Purpose
 
 Enable consistent, scalable development of **frontend and backend code in a single repository** while keeping:
+
 - Clear separation of concerns
 - Independent build, test, and deploy pipelines
 - Language and framework freedom per project
@@ -37,8 +38,8 @@ repo-root/
 ├── README.md # Monorepo overview
 └── Makefile | taskfile.yml # Root-level commands
 
-
 Rules:
+
 - Frontend code MUST live only in `frontend/`
 - Backend code MUST live only in `backend/`
 - No cross-imports between frontend and backend
@@ -186,3 +187,4 @@ Skill Scope: Full-stack monorepo
 Deployment Model: Independent frontend & backend
 Scalability: High
 Recommended For: SaaS, internal platforms, microservice-backed UIs
+```

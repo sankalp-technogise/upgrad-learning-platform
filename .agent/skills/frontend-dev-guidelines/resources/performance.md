@@ -32,12 +32,14 @@ export const DataDisplay: React.FC<{ items: Item[], searchTerm: string }> = ({
 ```
 
 **When to use useMemo:**
+
 - Filtering/sorting large arrays
 - Complex calculations
 - Transforming data structures
 - Expensive computations (loops, recursion)
 
 **When NOT to use useMemo:**
+
 - Simple string concatenation
 - Basic arithmetic
 - Premature optimization (profile first!)
@@ -78,12 +80,14 @@ export const Parent: React.FC = () => {
 ```
 
 **When to use useCallback:**
+
 - Functions passed as props to children
 - Functions used as dependencies in useEffect
 - Functions passed to memoized components
 - Event handlers in lists
 
 **When NOT to use useCallback:**
+
 - Event handlers not passed to children
 - Simple inline handlers: `onClick={() => doSomething()}`
 
@@ -111,6 +115,7 @@ export const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
 ```
 
 **When to use React.memo:**
+
 - Component renders frequently
 - Component has expensive rendering
 - Props don't change often
@@ -118,6 +123,7 @@ export const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
 - DataGrid cells/renderers
 
 **When NOT to use React.memo:**
+
 - Props change frequently anyway
 - Rendering is already fast
 - Premature optimization
@@ -146,7 +152,7 @@ const SearchResults: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
 // 2. Parent handles state and conditional rendering
 export const SearchComponent: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // Debounce for 300ms
     const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
@@ -157,7 +163,7 @@ export const SearchComponent: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder='Search...'
             />
-            
+
             {/* ✅ CORRECT - Only mount when we have a term */}
             {debouncedSearchTerm.length > 0 && (
                 <Suspense fallback={<div>Searching...</div>}>
@@ -170,6 +176,7 @@ export const SearchComponent: React.FC = () => {
 ```
 
 **Optimal Debounce Timing:**
+
 - **300-500ms**: Search/filtering
 - **1000ms**: Auto-save
 - **100-200ms**: Real-time validation
@@ -216,37 +223,37 @@ export const MyComponent: React.FC = () => {
 
 ```typescript
 useEffect(() => {
-    const handleResize = () => {
-        console.log('Resized');
-    };
+  const handleResize = () => {
+    console.log('Resized')
+  }
 
-    window.addEventListener('resize', handleResize);
+  window.addEventListener('resize', handleResize)
 
-    return () => {
-        window.removeEventListener('resize', handleResize);  // Cleanup!
-    };
-}, []);
+  return () => {
+    window.removeEventListener('resize', handleResize) // Cleanup!
+  }
+}, [])
 ```
 
 ### Abort Controllers for Fetch
 
 ```typescript
 useEffect(() => {
-    const abortController = new AbortController();
+  const abortController = new AbortController()
 
-    fetch('/api/data', { signal: abortController.signal })
-        .then(response => response.json())
-        .then(data => setState(data))
-        .catch(error => {
-            if (error.name === 'AbortError') {
-                console.log('Fetch aborted');
-            }
-        });
+  fetch('/api/data', { signal: abortController.signal })
+    .then((response) => response.json())
+    .then((data) => setState(data))
+    .catch((error) => {
+      if (error.name === 'AbortError') {
+        console.log('Fetch aborted')
+      }
+    })
 
-    return () => {
-        abortController.abort();  // Cleanup!
-    };
-}, []);
+  return () => {
+    abortController.abort() // Cleanup!
+  }
+}, [])
 ```
 
 **Note**: With TanStack Query, this is handled automatically.
@@ -382,20 +389,20 @@ export const Parent: React.FC<{ config: Config }> = ({ config }) => {
 
 ```typescript
 // ❌ AVOID - Import heavy libraries at top level
-import jsPDF from 'jspdf';  // Large library loaded immediately
-import * as XLSX from 'xlsx';  // Large library loaded immediately
+import jsPDF from 'jspdf' // Large library loaded immediately
+import * as XLSX from 'xlsx' // Large library loaded immediately
 
 // ✅ CORRECT - Dynamic import when needed
 const handleExportPDF = async () => {
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
-    // Use it
-};
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF()
+  // Use it
+}
 
 const handleExportExcel = async () => {
-    const XLSX = await import('xlsx');
-    // Use it
-};
+  const XLSX = await import('xlsx')
+  // Use it
+}
 ```
 
 ---
@@ -403,6 +410,7 @@ const handleExportExcel = async () => {
 ## Summary
 
 **Performance Checklist:**
+
 - ✅ `useMemo` for expensive computations (filter, sort, map)
 - ✅ `useCallback` for functions passed to children
 - ✅ `React.memo` for expensive components
@@ -414,6 +422,7 @@ const handleExportExcel = async () => {
 - ✅ Code splitting with React.lazy
 
 **See Also:**
+
 - [component-patterns.md](component-patterns.md) - Lazy loading
 - [data-fetching.md](data-fetching.md) - TanStack Query optimization
 - [complete-examples.md](complete-examples.md) - Performance patterns in context

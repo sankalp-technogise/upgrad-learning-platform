@@ -7,6 +7,7 @@ trigger: always_on
 ## Mandatory Security Checks
 
 Before ANY commit:
+
 - [ ] No hardcoded secrets (API keys, passwords, tokens, certificates)
 - [ ] All user inputs validated (`@Valid`, Bean Validation)
 - [ ] SQL injection prevention (JPA / parameterized queries only)
@@ -35,3 +36,4 @@ void validateConfig() {
         throw new IllegalStateException("OPENAI_API_KEY is not configured");
     }
 }
+```

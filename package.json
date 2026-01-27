@@ -1,0 +1,21 @@
+{
+  "name": "upgrad-learning-platform-root",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "backend/**/*.java": [
+      "bash -c \"./backend/gradlew -p backend spotlessCheck\" --"
+    ]
+  }
+}

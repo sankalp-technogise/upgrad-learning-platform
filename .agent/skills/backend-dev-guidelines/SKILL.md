@@ -16,15 +16,15 @@ Establish consistency and best practices across Java Spring Boot microservices u
 
 Activate when working on:
 
-* REST APIs and controllers
-* Service-layer business logic
-* Repository / database access
-* Validation and DTOs
-* Exception handling
-* Configuration & environment setup
-* Observability (logging, metrics, tracing)
-* Async processing and events
-* Testing or refactoring legacy code
+- REST APIs and controllers
+- Service-layer business logic
+- Repository / database access
+- Validation and DTOs
+- Exception handling
+- Configuration & environment setup
+- Observability (logging, metrics, tracing)
+- Async processing and events
+- Testing or refactoring legacy code
 
 ---
 
@@ -32,25 +32,25 @@ Activate when working on:
 
 ### New Backend Feature Checklist
 
-* [ ] **Controller**: Thin, request/response only
-* [ ] **DTOs**: Separate request/response models
-* [ ] **Service**: Business logic only
-* [ ] **Repository**: Data access abstraction
-* [ ] **Validation**: Bean Validation (`@Valid`)
-* [ ] **Exception Handling**: Global handler
-* [ ] **Observability**: Logs + metrics
-* [ ] **Tests**: Unit + integration
-* [ ] **Config**: `application.yml` / profiles
+- [ ] **Controller**: Thin, request/response only
+- [ ] **DTOs**: Separate request/response models
+- [ ] **Service**: Business logic only
+- [ ] **Repository**: Data access abstraction
+- [ ] **Validation**: Bean Validation (`@Valid`)
+- [ ] **Exception Handling**: Global handler
+- [ ] **Observability**: Logs + metrics
+- [ ] **Tests**: Unit + integration
+- [ ] **Config**: `application.yml` / profiles
 
 ### New Microservice Checklist
 
-* [ ] Package structure defined
-* [ ] Global exception handler
-* [ ] Validation enabled
-* [ ] Actuator configured
-* [ ] Logging & metrics configured
-* [ ] Database migration (Flyway/Liquibase)
-* [ ] Test framework setup
+- [ ] Package structure defined
+- [ ] Global exception handler
+- [ ] Validation enabled
+- [ ] Actuator configured
+- [ ] Logging & metrics configured
+- [ ] Database migration (Flyway/Liquibase)
+- [ ] Test framework setup
 
 ---
 
@@ -92,11 +92,11 @@ src/main/java/com/example/service/
 
 **Naming Conventions**
 
-* Controllers: `UserController`
-* Services: `UserService`
-* Repositories: `UserRepository`
-* DTOs: `CreateUserRequest`, `UserResponse`
-* Exceptions: `UserNotFoundException`
+- Controllers: `UserController`
+- Services: `UserService`
+- Repositories: `UserRepository`
+- DTOs: `CreateUserRequest`, `UserResponse`
+- Exceptions: `UserNotFoundException`
 
 ---
 
@@ -166,8 +166,8 @@ public class CreateUserRequest {
 }
 ```
 
-* Always use `@Valid`
-* Never trust raw input
+- Always use `@Valid`
+- Never trust raw input
 
 ---
 
@@ -221,9 +221,9 @@ class UserControllerIT {
 }
 ```
 
-* Unit tests for services
-* Integration tests for controllers/repos
-* No untested business logic
+- Unit tests for services
+- Integration tests for controllers/repos
+- No untested business logic
 
 ---
 
@@ -231,15 +231,15 @@ class UserControllerIT {
 
 ### Logging
 
-* Use SLF4J
-* Log at boundaries (controller, async, failures)
-* Never log secrets
+- Use SLF4J
+- Log at boundaries (controller, async, failures)
+- Never log secrets
 
 ### Metrics & Health
 
-* Spring Boot Actuator
-* Micrometer metrics
-* Health checks required
+- Spring Boot Actuator
+- Micrometer metrics
+- Health checks required
 
 ---
 
@@ -281,11 +281,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 Use ADRs for:
 
-* Database choices
-* Messaging vs REST
-* Sync vs async
-* Caching strategies
-* Major refactors
+- Database choices
+- Messaging vs REST
+- Sync vs async
+- Caching strategies
+- Major refactors
 
 Follow the same ADR template consistently.
 
@@ -293,10 +293,10 @@ Follow the same ADR template consistently.
 
 ## Related Skills
 
-* **architect** – System-level design & trade-offs
-* **tdd-guide** – Enforce test-first development
-* **database-verification** – Schema & migration safety
-* **observability** – Logging, metrics, tracing
+- **architect** – System-level design & trade-offs
+- **tdd-guide** – Enforce test-first development
+- **database-verification** – Schema & migration safety
+- **observability** – Logging, metrics, tracing
 
 ---
 

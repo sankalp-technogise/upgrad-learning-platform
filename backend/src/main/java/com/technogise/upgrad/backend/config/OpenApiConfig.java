@@ -9,17 +9,18 @@ import org.springframework.context.annotation.Configuration;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 public class OpenApiConfig {
 
-    /**
-     * Configures the OpenAPI definition.
-     *
-     * @return the OpenAPI bean
-     */
-    @Bean
-    public OpenAPI customOpenApi() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Upgrad Learning Platform Backend")
-                        .version("v1")
-                        .description("API documentation for the Upgrad Learning Platform"));
-    }
+  /**
+   * Configures the OpenAPI definition.
+   *
+   * @return the OpenAPI bean
+   */
+  @Bean
+  public OpenAPI customOpenApi() {
+    return new OpenAPI()
+        .info(
+            new Info()
+                .title("Upgrad Learning Platform Backend")
+                .version("v1")
+                .description("API documentation for the Upgrad Learning Platform"));
+  }
 }

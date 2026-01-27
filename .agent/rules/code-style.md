@@ -2,120 +2,44 @@
 trigger: always_on
 ---
 
-# Coding Style (Java / Spring Boot)
+# Code Style Rules (Java / Spring Boot)
 
-## Immutability (CRITICAL)
+## 1. Immutability
 
-ALWAYS prefer immutable objects.  
-NEVER mutate shared state.
+- **Domain Objects**: MUST be immutable. No setters.
+- **DTOs**: MUST be Records or immutable classes.
+- **Method Arguments**: MUST NOT be mutated.
+- **Collections**: MUST use defensive copies or immutable collections.
+- **State**: NO shared mutable state allowed in services or components.
 
-```java
-// ❌ WRONG: Mutation
-public User updateUser(User user, String name) {
-    user.setName(name); // MUTATION
-    return user;
-}
+## 2. File & Class Organization
 
-// ✅ CORRECT: Immutability
-public User updateUser(User user, String name) {
-    return new User(
-        user.getId(),
-        name,
-        user.getEmail()
-    );
-}
-Rules:
+- **Class Size**: HARD LIMIT of 800 lines. Refactor if exceeded.
+- **Cohesion**: Classes MUST have a single responsibility.
+- **Helpers**: Extract logic into helper classes or static utilities.
 
-Prefer immutable domain objects
+## 3. Error Handling
 
-Use constructors / builders instead of setters
+- **Exceptions**: NEVER swallow exceptions.
+- **Catch Blocks**: NEVER catch `Exception` or `Throwable` broadly.
+- **Custom Exceptions**: USE custom exceptions for domain errors.
+- **Controllers**: MUST rely on global exception handling ( `@ControllerAdvice`).
 
-Avoid mutating method arguments
+## 4. Input Validation
 
-Defensive copies for collections
+- **Boundaries**: ALL external inputs MUST be validated at the controller level using `@Valid`.
+- **Trust**: NEVER trust client input.
+- **Fail Fast**: Applications MUST fail fast on invalid data.
 
-File & Class Organization
-MANY SMALL CLASSES > FEW LARGE CLASSES:
+## 5. Code Hygiene
 
-High cohesion, low coupling
+- **Logging**: NO `System.out.println`. Use SLF4J.
+- **Hardcoded Values**: NO hardcoded secrets or magic numbers. Use `@Value` or constants.
+- **Nesting**: NO nesting deeper than 4 levels.
+- **Method Size**: Methods SHOULD be small (<50 lines).
+- **Comments**: NO unnecessary comments ("what"). Comment only "why".
 
-Typical size: 200–400 lines
+## 6. Testing
 
-Hard limit: 800 lines
-
-Extract helpers, mappers, utilities
-
-Organize by feature/domain, not technical layer alone
-
-Error Handling
-ALWAYS handle errors explicitly and consistently:
-
-try {
-    return riskyOperation();
-} catch (SpecificException ex) {
-    log.error("Operation failed", ex);
-    throw new BusinessException("User-friendly error message", ex);
-}
-Rules:
-
-Never swallow exceptions
-
-Never catch Exception or Throwable broadly
-
-Use custom exceptions for domain errors
-
-Controllers must rely on global exception handling
-
-Input Validation
-ALWAYS validate external input at boundaries:
-
-public record CreateUserRequest(
-    @NotBlank @Email String email,
-    @Min(0) @Max(150) int age
-) {}
-Rules:
-
-Validate at controller level using @Valid
-
-Never trust client input
-
-Fail fast on invalid data
-
-Code Quality Checklist
-Before marking work complete:
-
- Code is readable and intention-revealing
-
- Classes are focused and cohesive
-
- Methods are small (<50 lines)
-
- Files are focused (<800 lines)
-
- No deep nesting (>4 levels)
-
- Proper exception handling
-
- No System.out.println
-
- No hardcoded values
-
- No shared mutable state
-
-
----
-
-### My opinion
-
-This rule is **deliberately strict** because Java codebases degrade through:
-- mutable domain models
-- oversized service classes
-- silent exception handling
-
-Enforcing immutability and small, focused classes keeps Spring Boot systems **maintainable for years**, not months.
-
-If you want, I can next:
-- Add a **Kotlin-first variant**
-- Create an **immutability enforcement checklist**
-- Align this rule with **DDD aggregates**
-- Map this to **Sonar / Detekt / Checkstyle rules**
+- **Coverage**: Minimum 80% coverage required.
+- **Assertions**: Tests MUST include assertions.

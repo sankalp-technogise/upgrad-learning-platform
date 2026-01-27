@@ -1,4 +1,4 @@
-.PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down
+.PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down format format-backend format-frontend
 
 # Default target
 all: build
@@ -8,6 +8,9 @@ build: build-backend build-frontend
 
 # Test everything
 test: test-backend test-frontend
+
+# Format everything
+format: format-backend format-frontend
 
 # --- Backend (Spring Boot) ---
 build-backend:
@@ -22,6 +25,10 @@ run-backend:
 	@echo "Starting Backend..."
 	cd backend && ./gradlew bootRun
 
+format-backend:
+	@echo "Formatting Backend..."
+	cd backend && ./gradlew spotlessApply
+
 # --- Frontend (React) ---
 build-frontend:
 	@echo "Building Frontend..."
@@ -34,6 +41,10 @@ test-frontend:
 run-frontend:
 	@echo "Starting Frontend..."
 	cd frontend && npm run dev
+
+format-frontend:
+	@echo "Formatting Frontend..."
+	npm run format
 
 # --- Docker ---
 docker-up:

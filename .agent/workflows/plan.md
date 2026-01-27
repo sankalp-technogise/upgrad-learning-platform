@@ -7,6 +7,7 @@ description: New project setup from requirement
 ## Goal
 
 Parse a **project description / product specification file** and generate a **production-ready monorepo** that:
+
 - Contains frontend and backend in a single repo
 - Builds, tests, and deploys independently
 - May contain **no business features initially**
@@ -30,13 +31,16 @@ This workflow focuses on **correct ordering of agent personas**.
 
 ## Step 1: Parse & Normalize Requirements
 
-### Persona: `product-clarifier` (if available)  
-*(If not available, `planner` performs this step lightly)*
+### Persona: `product-clarifier` (if available)
+
+_(If not available, `planner` performs this step lightly)_
 
 **Input**
+
 - Project description file
 
 **Actions**
+
 - Read and summarize:
   - Product scope
   - Frontend needs (UI vs API-only)
@@ -48,6 +52,7 @@ This workflow focuses on **correct ordering of agent personas**.
   - Open questions
 
 **Output**
+
 - Normalized requirements summary
 - Explicit assumptions documented
 - Open questions listed (do NOT block bootstrap)
@@ -59,10 +64,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ### Persona: `architect` (MANDATORY)
 
 **Input**
+
 - Normalized requirements
 - Assumptions and constraints
 
 **Actions**
+
 - Decide:
   - Monorepo usage (confirmed)
   - Frontend vs backend responsibility split
@@ -74,11 +81,13 @@ This workflow focuses on **correct ordering of agent personas**.
   - Default patterns to follow
 
 **Output**
+
 - Architecture overview
 - Repo-level decisions
 - Any required ADRs
 
 **Rule**
+
 - No file-level planning yet
 - No implementation steps
 
@@ -89,10 +98,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ### Persona: `planner` (MANDATORY)
 
 **Input**
+
 - Architecture decisions
 - Product requirements (even if minimal)
 
 **Actions**
+
 - Produce a bootstrap implementation plan covering:
   - Repo creation
   - Folder structure
@@ -107,6 +118,7 @@ This workflow focuses on **correct ordering of agent personas**.
   5. CI / deploy readiness
 
 **Output**
+
 - Step-by-step implementation plan
 - Success criteria:
   - `frontend` builds
@@ -121,10 +133,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ### Persona: `monorepo-fullstack` (MANDATORY)
 
 **Input**
+
 - Planner execution plan
 - Architect constraints
 
 **Actions**
+
 - Create repository structure:
   - `/frontend`
   - `/backend`
@@ -138,6 +152,7 @@ This workflow focuses on **correct ordering of agent personas**.
   - No cross-dependencies
 
 **Output**
+
 - Monorepo skeleton
 - Root-level commands functional
 
@@ -146,10 +161,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ## Step 5: Bootstrap Backend (Empty but Healthy)
 
 ### Personas:
+
 - `backend-dev-guidelines`
 - `tdd-guide`
 
 **Actions**
+
 - Create backend application with:
   - Application entry point
   - Health endpoint
@@ -164,6 +181,7 @@ This workflow focuses on **correct ordering of agent personas**.
   - Backend can be deployed (Docker or equivalent)
 
 **Output**
+
 - Buildable, testable backend with zero features
 
 ---
@@ -171,10 +189,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ## Step 6: Bootstrap Frontend (Empty but Healthy)
 
 ### Personas:
+
 - `frontend-dev-guidelines`
 - `tdd-guide`
 
 **Actions**
+
 - Create frontend application with:
   - App shell
   - Health/status page
@@ -186,6 +206,7 @@ This workflow focuses on **correct ordering of agent personas**.
   - Frontend can be deployed independently
 
 **Output**
+
 - Buildable, testable frontend with zero features
 
 ---
@@ -193,10 +214,12 @@ This workflow focuses on **correct ordering of agent personas**.
 ## Step 7: Root-Level Verification
 
 ### Personas:
+
 - `planner` (light check)
 - `security-reviewer` (basic scan)
 
 **Actions**
+
 - Run:
   - Root-level build
   - Root-level test
@@ -206,6 +229,7 @@ This workflow focuses on **correct ordering of agent personas**.
 - Confirm success criteria
 
 **Output**
+
 - Verified green baseline
 - Ready-for-feature-development repo
 
@@ -216,6 +240,7 @@ This workflow focuses on **correct ordering of agent personas**.
 ### Outcome
 
 The system is now:
+
 - Architecturally defined
 - Structurally sound
 - Buildable

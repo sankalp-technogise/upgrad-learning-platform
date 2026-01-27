@@ -18,6 +18,7 @@ This skill focuses on **execution planning**, not system design.
 ## Scope & Boundaries
 
 ### The planner MUST:
+
 - Break down complex work into ordered, testable steps
 - Identify dependencies between tasks
 - Specify file paths, modules, and components
@@ -25,6 +26,7 @@ This skill focuses on **execution planning**, not system design.
 - Produce plans that enable incremental delivery
 
 ### The planner MUST NOT:
+
 - Invent or modify system architecture
 - Introduce new patterns, frameworks, or services
 - Redesign data models or system boundaries
@@ -35,6 +37,7 @@ This skill focuses on **execution planning**, not system design.
 ## When to Use This Skill
 
 Use when:
+
 - Implementing a new feature of moderate or high complexity
 - Refactoring non-trivial parts of the system
 - Coordinating frontend and backend work
@@ -46,6 +49,7 @@ Use when:
 ## Required Inputs
 
 Before planning begins, ensure:
+
 - Product requirements are available and understood
 - **`SPEC.md` is committed and represents the human-approved source of truth**
 - Architectural decisions (if any) are finalized
@@ -58,6 +62,7 @@ If architectural clarity is missing, STOP and request the `architect` skill.
 ## Planning Process
 
 ### 1. Requirement Interpretation
+
 - Restate requirements in engineering terms
 - Identify success criteria
 - List assumptions and constraints
@@ -66,6 +71,7 @@ If architectural clarity is missing, STOP and request the `architect` skill.
 ---
 
 ### 2. Impact Analysis
+
 - Identify affected systems, modules, and files
 - Distinguish between frontend, backend, and shared work
 - Note dependencies and ordering constraints
@@ -73,7 +79,9 @@ If architectural clarity is missing, STOP and request the `architect` skill.
 ---
 
 ### 3. Step Breakdown
+
 Break work into phases and steps with:
+
 - Specific actions
 - Exact file paths or modules
 - Dependencies on other steps
@@ -83,6 +91,7 @@ Break work into phases and steps with:
 ---
 
 ### 4. Implementation Order
+
 - Order steps to minimize risk
 - Enable early feedback and testing
 - Avoid large, irreversible changes
@@ -91,6 +100,7 @@ Break work into phases and steps with:
 ---
 
 ### 5. Testing Strategy
+
 - Identify unit tests to add or update
 - Define integration flows to verify
 - Highlight E2E scenarios for critical paths
@@ -103,17 +113,21 @@ Break work into phases and steps with:
 # Implementation Plan: <Feature Name>
 
 ## Overview
+
 <2–3 sentence summary>
 
 ## Requirements
+
 - <Requirement 1>
 - <Requirement 2>
 
 ## Assumptions & Constraints
+
 - <Assumption>
 - <Constraint>
 
 ## Affected Areas
+
 - Frontend: <paths/modules or N/A>
 - Backend: <paths/modules or N/A>
 - Infrastructure: <paths or N/A>
@@ -121,6 +135,7 @@ Break work into phases and steps with:
 ## Implementation Steps
 
 ### Phase 1: <Phase Name>
+
 1. **<Step Name>** (File: <path>)
    - Action: <What to do>
    - Why: <Reason>
@@ -128,17 +143,22 @@ Break work into phases and steps with:
    - Risk: <Low / Medium / High>
 
 ### Phase 2: <Phase Name>
+
 ...
 
 ## Testing Strategy
+
 - Unit tests: <components>
 - Integration tests: <flows>
 - E2E tests: <user journeys>
 
 ## Risks & Mitigations
+
 - **Risk**: <Description>
   - Mitigation: <Approach>
 
 ## Success Criteria
+
 - [ ] <Criterion 1>
 - [ ] <Criterion 2>
+```

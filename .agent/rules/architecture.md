@@ -7,6 +7,7 @@ trigger: always_on
 ## Mandatory Architectural Review
 
 The `architect` skill MUST be used when:
+
 - Designing new features that introduce new components or services
 - Refactoring large or cross-cutting parts of the system
 - Making scalability, performance, or security-impacting decisions
