@@ -32,6 +32,24 @@ Treat this file as the **absolute source of truth**. Before writing code, read t
 ### Maintenance
 If the user changes requirements during the chat, you **must update `SPEC.md`** to reflect the new consensus before implementing code. This prevents 'context loss' and ensures the spec remains a living executable artifact.
 
+### Versioning & Governance
+
+**Rule of Thumb**: Treat the spec like code (reviews + versioning).
+
+**When to Push `SPEC.md`**:
+- [x] It represents agreed product/feature requirements
+- [x] Humans have reviewed/edited it (not a raw AI dump)
+- [x] It serves as the source of truth for implementation
+- [x] Traceability is needed (spec → code → PR)
+
+**When NOT to Push**:
+- [ ] It is ephemeral (regenerated every run)
+- [ ] It contains prompt noise or hallucinations
+- [ ] It is purely an intermediate AI artifact
+
+> [!TIP]
+> **Best Practice**: Commit a curated `SPEC.md` or `REQUIREMENTS.md`. Keep raw AI output ignored (e.g., `spec.generated.md` in `.gitignore`).
+
 ---
 
 ## 2. The Style Guide (`STYLE.md`)

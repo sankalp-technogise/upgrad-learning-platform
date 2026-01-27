@@ -47,6 +47,7 @@ Use when:
 
 Before planning begins, ensure:
 - Product requirements are available and understood
+- **`SPEC.md` is committed and represents the human-approved source of truth**
 - Architectural decisions (if any) are finalized
 - Constraints and assumptions are explicit
 

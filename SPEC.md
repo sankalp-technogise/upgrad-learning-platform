@@ -1,7 +1,7 @@
 # Project Specification
 
 > **Status**: Beta Scoping
-> **Last Updated**: 2026-01-21
+> **Last Updated**: 2026-01-27
 
 ## 1. Overview
 The "On-Demand Learning Platform" is a mobile-first video streaming application designed to deliver educational content to a closed beta group of ~100 users. The system highlights a core loop of "Ingest -> Feed -> Watch -> Recommend -> Measure".
@@ -82,3 +82,21 @@ Monorepo structure containing a backend service and a web frontend.
 ## 6. Open Questions
 - Web Push Notifications strategy (PWA or basic browser notifications)?
 - Exact video hosting solution (S3/CloudFront assumed).
+
+## 7. Versioning & Governance
+
+**Rule of Thumb**: Treat the spec like code (reviews + versioning).
+
+**When to Push `SPEC.md`**:
+- [x] It represents agreed product/feature requirements
+- [x] Humans have reviewed/edited it (not a raw AI dump)
+- [x] It serves as the source of truth for implementation
+- [x] Traceability is needed (spec → code → PR)
+
+**When NOT to Push**:
+- [ ] It is ephemeral (regenerated every run)
+- [ ] It contains prompt noise or hallucinations
+- [ ] It is purely an intermediate AI artifact
+
+> [!TIP]
+> **Best Practice**: Commit a curated `SPEC.md` or `REQUIREMENTS.md`. Keep raw AI output ignored (e.g., `spec.generated.md` in `.gitignore`).
