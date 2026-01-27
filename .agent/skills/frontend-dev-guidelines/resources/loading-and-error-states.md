@@ -31,7 +31,7 @@ const Component = () => {
 
 ### The Solutions
 
-**Option 1: SuspenseLoader (PREFERRED for new components)**
+### Option 1: SuspenseLoader (PREFERRED for new components)
 
 ```typescript
 import { SuspenseLoader } from '~components/SuspenseLoader';
@@ -47,7 +47,7 @@ export const MyComponent: React.FC = () => {
 };
 ```
 
-**Option 2: LoadingOverlay (for legacy useQuery patterns)**
+### Option 2: LoadingOverlay (for legacy useQuery patterns)
 
 ```typescript
 import { LoadingOverlay } from '~components/LoadingOverlay';
@@ -380,16 +380,15 @@ import { Button } from '@mui/material';
 import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
 import { myFeatureApi } from '../api/myFeatureApi';
 
-export const EntityEditor: React.FC<{ id: number }> = ({ id }) => {
+import { ErrorBoundary } from 'react-error-boundary';
+
+const EntityEditorContent: React.FC<{ id: number }> = ({ id }) => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useMuiSnackbar();
 
     const { data } = useSuspenseQuery({
         queryKey: ['entity', id],
         queryFn: () => myFeatureApi.getEntity(id),
-        onError: () => {
-            showError('Failed to load entity');
-        },
     });
 
     const updateMutation = useMutation({
@@ -409,6 +408,19 @@ export const EntityEditor: React.FC<{ id: number }> = ({ id }) => {
         <Button onClick={() => updateMutation.mutate({ name: 'New' })}>
             Update
         </Button>
+    );
+};
+
+export const EntityEditor: React.FC<{ id: number }> = ({ id }) => {
+    const { showError } = useMuiSnackbar();
+
+    return (
+        <ErrorBoundary
+            fallbackRender={() => null}
+            onError={() => showError('Failed to load entity')}
+        >
+            <EntityEditorContent id={id} />
+        </ErrorBoundary>
     );
 };
 ```

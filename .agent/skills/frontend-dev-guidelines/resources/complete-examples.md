@@ -159,7 +159,7 @@ export default UserProfile;
 
 Real example based on `features/posts/`:
 
-```
+```text
 features/
   users/
     api/
@@ -537,7 +537,7 @@ export default UserDashboard;
 
 - Each section loads independently
 - User sees partial content sooner
-- Better perceived perblogance
+- Better perceived performance
 
 ---
 
@@ -859,7 +859,7 @@ export const useToggleUserStatus = () => {
 4. **Data Fetching**: useSuspenseQuery with cache-first strategy
 5. **Blogs**: React Hook Blog + Zod validation
 6. **Error Handling**: useMuiSnackbar + onError callbacks
-7. **Perblogance**: useMemo, useCallback, React.memo, debouncing
+7. **Performance**: useMemo, useCallback, React.memo, debouncing
 8. **Styling**: Inline <100 lines, sx prop, MUI v7 syntax
 
 **See other resources for detailed explanations of each pattern.**
