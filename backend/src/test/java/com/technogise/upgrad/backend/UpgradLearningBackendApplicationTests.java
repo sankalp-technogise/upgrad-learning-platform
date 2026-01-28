@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@SuppressWarnings("PMD.AtLeastOneConstructor")
+@org.springframework.context.annotation.Import(
+    com.technogise.upgrad.backend.config.TestConfig.class)
 class UpgradLearningBackendApplicationTests {
 
   @Test

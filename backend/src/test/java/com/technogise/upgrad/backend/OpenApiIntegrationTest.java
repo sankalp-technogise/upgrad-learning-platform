@@ -11,7 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@SuppressWarnings("PMD.AtLeastOneConstructor")
+@org.springframework.context.annotation.Import({
+  com.technogise.upgrad.backend.config.TestConfig.class
+})
+@org.springframework.test.context.ActiveProfiles("test")
 class OpenApiIntegrationTest {
 
   @LocalServerPort private int port;
@@ -19,7 +22,6 @@ class OpenApiIntegrationTest {
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
   @Test
-  @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
   void shouldExposeOpenApiDocs() throws Exception {
     final HttpRequest request =
         HttpRequest.newBuilder()
@@ -35,7 +37,6 @@ class OpenApiIntegrationTest {
   }
 
   @Test
-  @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
   void shouldExposeSwaggerUi() throws Exception {
     // Swagger UI usually redirects, so we follow redirects or check the redirect
     // location

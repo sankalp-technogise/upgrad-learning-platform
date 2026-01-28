@@ -1,5 +1,11 @@
 .PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down format format-backend format-frontend
 
+# Load environment variables from .env file if it exists
+ifneq (,$(wildcard .env))
+    include .env
+    export $(shell sed 's/=.*//' .env)
+endif
+
 # Default target
 all: build
 
