@@ -23,6 +23,7 @@ public class AuthService {
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
+  @SuppressWarnings("null") // JPA save() never returns null
   public void generateOtp(final String email) {
     final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(999_999));
     final String otpHash = hashOtp(otp);
@@ -41,6 +42,7 @@ public class AuthService {
   }
 
   @Transactional
+  @SuppressWarnings("null") // JPA save()/orElseGet() never returns null
   public AuthResponse login(final String email, final String otp) {
     final OtpVerification verification =
         otpRepository

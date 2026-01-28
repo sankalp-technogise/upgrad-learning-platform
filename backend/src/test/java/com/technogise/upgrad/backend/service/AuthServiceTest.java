@@ -36,6 +36,7 @@ class AuthServiceTest {
   @InjectMocks private AuthService authService;
 
   @Test
+  @SuppressWarnings("null") // Mock repository save() returns
   void shouldGenerateOtpAndSendEmail() {
     final String email = "test@example.com";
 
@@ -46,6 +47,7 @@ class AuthServiceTest {
   }
 
   @Test
+  @SuppressWarnings("null") // Mock repository returns
   void shouldLoginSuccessfullyWithValidOtp() {
     final String email = "test@example.com";
     final String otp = "123456";
@@ -78,6 +80,7 @@ class AuthServiceTest {
   }
 
   @Test
+  @SuppressWarnings("null") // Mock repository returns
   void shouldCreateUserIfNotExistsOnLogin() {
     final String email = "newuser@example.com";
     final String otp = "654321";
@@ -110,6 +113,7 @@ class AuthServiceTest {
   }
 
   @Test
+  @SuppressWarnings("null") // Mock repository returns
   void shouldThrowExceptionForInvalidOtp() {
     final String email = "test@example.com";
     final String otp = "wrong-otp";
@@ -135,6 +139,7 @@ class AuthServiceTest {
   }
 
   @Test
+  @SuppressWarnings("null") // Mock repository returns
   void shouldThrowExceptionForExpiredOtp() {
     final String email = "test@example.com";
     final String otp = "123456";

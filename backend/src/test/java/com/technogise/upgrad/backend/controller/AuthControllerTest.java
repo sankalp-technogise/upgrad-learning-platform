@@ -12,16 +12,19 @@ import com.technogise.upgrad.backend.dto.AuthResponse;
 import com.technogise.upgrad.backend.dto.LoginRequest;
 import com.technogise.upgrad.backend.dto.OtpRequest;
 import com.technogise.upgrad.backend.dto.UserDto;
+import com.technogise.upgrad.backend.exception.GlobalExceptionHandler;
 import com.technogise.upgrad.backend.service.AuthService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
+@Import(GlobalExceptionHandler.class)
 class AuthControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -31,6 +34,7 @@ class AuthControllerTest {
   @MockitoBean private AuthService authService;
 
   @Test
+  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldRequestOtpSuccessfully() throws Exception {
     final OtpRequest request = new OtpRequest("test@example.com");
 
@@ -45,17 +49,20 @@ class AuthControllerTest {
   }
 
   @Test
+  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenRequestOtpWithInvalidEmail() throws Exception {
     final OtpRequest request = new OtpRequest("invalid");
 
-    mockMvc.perform(
-        post("/api/auth/otp")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)));
-    // .andExpect(status().isOk()); // TODO: Fix validation, currently permissive
+    mockMvc
+        .perform(
+            post("/api/auth/otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
+  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldLoginSuccessfully() throws Exception {
     final LoginRequest request = new LoginRequest("test@example.com", "123456");
     final UUID userId = UUID.randomUUID();
@@ -77,13 +84,15 @@ class AuthControllerTest {
   }
 
   @Test
+  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenLoginWithInvalidEmail() throws Exception {
     final LoginRequest request = new LoginRequest("invalid", "123456");
 
-    mockMvc.perform(
-        post("/api/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)));
-    // .andExpect(status().isOk()); // TODO: Fix validation, currently permissive
+    mockMvc
+        .perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 }
