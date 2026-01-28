@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
-import { authApi } from '@/features/auth/api/authApi' // Assuming aliasing is setup or use relative
+import { authApi } from '@/features/auth/api/authApi'
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -16,7 +16,6 @@ export const LoginPage: React.FC = () => {
 
     try {
       await authApi.requestOtp(email)
-      // Navigate to OTP page
       navigate({ to: '/auth/otp', search: { email } })
     } catch (err) {
       console.error(err)
@@ -27,18 +26,39 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f5f5f5',
+      }}
+    >
+      <Container maxWidth="xs">
+        <Paper
+          elevation={0}
+          sx={{
+            p: 5,
+            width: '100%',
+            borderRadius: 3,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          }}
+        >
+          <Typography
+            component="h1"
+            variant="h5"
+            align="center"
+            sx={{ fontWeight: 700, mb: 1, color: '#263238' }}
+          >
             Login or Sign Up
           </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 5 }}>
             Enter your email to receive a login code.
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#37474f' }}>
               Email Address
             </Typography>
             <TextField
@@ -54,7 +74,7 @@ export const LoginPage: React.FC = () => {
               error={!!error}
               helperText={error}
               InputProps={{
-                sx: { borderRadius: 1 },
+                sx: { borderRadius: 1.5 },
               }}
             />
             <Button
@@ -63,12 +83,17 @@ export const LoginPage: React.FC = () => {
               variant="contained"
               size="large"
               sx={{
-                mt: 3,
+                mt: 4,
                 mb: 1,
                 py: 1.5,
                 textTransform: 'none',
                 fontSize: '1rem',
                 fontWeight: 600,
+                borderRadius: 2,
+                backgroundColor: '#5c6bc0',
+                '&:hover': {
+                  backgroundColor: '#3f51b5',
+                },
               }}
               disabled={isLoading}
             >
@@ -76,7 +101,7 @@ export const LoginPage: React.FC = () => {
             </Button>
           </Box>
         </Paper>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   )
 }
