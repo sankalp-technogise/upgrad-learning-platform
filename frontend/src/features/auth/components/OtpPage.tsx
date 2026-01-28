@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/api/authApi'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/useAuth'
 
 export const OtpPage: React.FC = () => {
   const [otp, setOtp] = useState('')

@@ -1,5 +1,5 @@
 import { Button, Container, Typography, Box } from '@mui/material'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/useAuth'
 import { useNavigate } from '@tanstack/react-router'
 
 export const HomePage = () => {
