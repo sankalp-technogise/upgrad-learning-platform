@@ -16,12 +16,4 @@ class UpgradLearningBackendApplicationTests {
     // Verify context loads
     org.assertj.core.api.Assertions.assertThat(this).isNotNull();
   }
-
-  @Test
-  void main() {
-    UpgradLearningBackendApplication.main(new String[] {});
-    // Verify main method runs without exception, though in reality this test is a
-    // bit redundant given contextLoads
-    org.assertj.core.api.Assertions.assertThat(true).isTrue();
-  }
 }
