@@ -30,20 +30,22 @@ export const LoginPage: React.FC = () => {
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Sign in
+          <Typography component="h1" variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1 }}>
+            Login or Sign Up
           </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
-            Use your professional email to login
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
+            Enter your email to receive a login code.
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+              Email Address
+            </Typography>
             <TextField
-              margin="normal"
               required
               fullWidth
               id="email"
-              label="Email Address"
+              placeholder="you@example.com"
               name="email"
               autoComplete="email"
               autoFocus
@@ -51,12 +53,23 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               error={!!error}
               helperText={error}
+              InputProps={{
+                sx: { borderRadius: 1 },
+              }}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              size="large"
+              sx={{
+                mt: 3,
+                mb: 1,
+                py: 1.5,
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: 600,
+              }}
               disabled={isLoading}
             >
               {isLoading ? 'Sending...' : 'Send OTP'}
