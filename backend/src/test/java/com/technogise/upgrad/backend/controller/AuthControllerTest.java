@@ -24,14 +24,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
-@Import({GlobalExceptionHandler.class, com.technogise.upgrad.backend.config.SecurityConfig.class})
+@Import({ GlobalExceptionHandler.class, com.technogise.upgrad.backend.config.SecurityConfig.class })
 class AuthControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-  @MockitoBean private AuthService authService;
+  @MockitoBean
+  private AuthService authService;
 
   @MockitoBean
   private com.technogise.upgrad.backend.security.JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -39,11 +42,11 @@ class AuthControllerTest {
   @org.junit.jupiter.api.BeforeEach
   void setUp() throws jakarta.servlet.ServletException, java.io.IOException {
     org.mockito.Mockito.doAnswer(
-            invocation -> {
-              jakarta.servlet.FilterChain chain = invocation.getArgument(2);
-              chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
-              return null;
-            })
+        invocation -> {
+          jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+          chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
+          return null;
+        })
         .when(jwtAuthenticationFilter)
         .doFilter(
             org.mockito.ArgumentMatchers.any(),
@@ -85,8 +88,7 @@ class AuthControllerTest {
   void shouldLoginSuccessfully() throws Exception {
     final LoginRequest request = new LoginRequest("test@example.com", "123456");
     final UUID userId = UUID.randomUUID();
-    final AuthResponse authResponse =
-        new AuthResponse("jwt-token", new UserDto(userId, "test@example.com"));
+    final AuthResponse authResponse = new AuthResponse("jwt-token", new UserDto(userId, "test@example.com"));
 
     when(authService.login(anyString(), anyString())).thenReturn(authResponse);
 
@@ -141,17 +143,15 @@ class AuthControllerTest {
 
     // Mock the filter to populate SecurityContext with email as principal
     org.mockito.Mockito.doAnswer(
-            invocation -> {
-              org.springframework.security.core.Authentication auth =
-                  new org.springframework.security.authentication
-                      .UsernamePasswordAuthenticationToken(
-                      email, null, java.util.Collections.emptyList());
-              org.springframework.security.core.context.SecurityContextHolder.getContext()
-                  .setAuthentication(auth);
-              jakarta.servlet.FilterChain chain = invocation.getArgument(2);
-              chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
-              return null;
-            })
+        invocation -> {
+          org.springframework.security.core.Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+              email, null, java.util.Collections.emptyList());
+          org.springframework.security.core.context.SecurityContextHolder.getContext()
+              .setAuthentication(auth);
+          jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+          chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
+          return null;
+        })
         .when(jwtAuthenticationFilter)
         .doFilter(
             org.mockito.ArgumentMatchers.any(),

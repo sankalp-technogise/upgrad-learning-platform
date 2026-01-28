@@ -32,8 +32,7 @@ public class AuthService {
     checkRateLimit(email);
 
     // Invalidate all previous unverified OTPs for this email
-    final java.util.List<OtpVerification> previousOtps =
-        otpRepository.findAllByEmailAndVerified(email, false);
+    final java.util.List<OtpVerification> previousOtps = otpRepository.findAllByEmailAndVerified(email, false);
     previousOtps.forEach(
         otp -> {
           otp.setVerified(true);
@@ -44,15 +43,14 @@ public class AuthService {
     final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(1_000_000));
     final String otpHash = hashOtp(otp);
 
-    final OtpVerification verification =
-        OtpVerification.builder()
-            .email(email)
-            .otpHash(otpHash)
-            .createdAt(LocalDateTime.now())
-            .expiresAt(LocalDateTime.now().plusMinutes(5))
-            .attempts(0)
-            .verified(false)
-            .build();
+    final OtpVerification verification = OtpVerification.builder()
+        .email(email)
+        .otpHash(otpHash)
+        .createdAt(LocalDateTime.now())
+        .expiresAt(LocalDateTime.now().plusMinutes(5))
+        .attempts(0)
+        .verified(false)
+        .build();
     otpRepository.save(verification);
     emailService.sendOtp(email, otp);
   }
@@ -60,10 +58,9 @@ public class AuthService {
   @Transactional
   @SuppressWarnings("null")
   public AuthResponse login(final String email, final String otp) {
-    final OtpVerification verification =
-        otpRepository
-            .findFirstByEmailOrderByCreatedAtDesc(email)
-            .orElseThrow(() -> new AuthenticationException("Invalid OTP or Email"));
+    final OtpVerification verification = otpRepository
+        .findFirstByEmailOrderByCreatedAtDesc(email)
+        .orElseThrow(() -> new AuthenticationException("Invalid OTP or Email"));
 
     if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
       throw new AuthenticationException("OTP Expired");
@@ -90,10 +87,9 @@ public class AuthService {
     verification.setVerified(true);
     otpRepository.save(verification);
 
-    final User user =
-        userRepository
-            .findByEmail(email)
-            .orElseGet(() -> userRepository.save(User.builder().email(email).build()));
+    final User user = userRepository
+        .findByEmail(email)
+        .orElseGet(() -> userRepository.save(User.builder().email(email).build()));
 
     final String token = jwtService.generateToken(user.getId(), user.getEmail());
 
@@ -124,22 +120,19 @@ public class AuthService {
   }
 
   private void checkRateLimit(final String email) {
-    final LocalDateTime windowStart =
-        LocalDateTime.now().minusSeconds(rateLimitConfig.getTimeWindowSeconds());
+    final LocalDateTime windowStart = LocalDateTime.now().minusSeconds(rateLimitConfig.getTimeWindowSeconds());
 
-    final java.util.List<OtpVerification> recentRequests =
-        otpRepository.findByEmailAndCreatedAtAfterOrderByCreatedAtAsc(email, windowStart);
+    final java.util.List<OtpVerification> recentRequests = otpRepository
+        .findByEmailAndCreatedAtAfterOrderByCreatedAtAsc(email, windowStart);
 
     if (recentRequests.size() >= rateLimitConfig.getMaxAttempts()) {
       final LocalDateTime oldestRequest = recentRequests.get(0).getCreatedAt();
-      final LocalDateTime cooldownEnd =
-          oldestRequest
-              .plusSeconds(rateLimitConfig.getTimeWindowSeconds())
-              .plusMinutes(rateLimitConfig.getCooldownMinutes());
+      final LocalDateTime cooldownEnd = oldestRequest
+          .plusSeconds(rateLimitConfig.getTimeWindowSeconds())
+          .plusMinutes(rateLimitConfig.getCooldownMinutes());
 
       if (LocalDateTime.now().isBefore(cooldownEnd)) {
-        final long secondsRemaining =
-            java.time.Duration.between(LocalDateTime.now(), cooldownEnd).getSeconds();
+        final long secondsRemaining = java.time.Duration.between(LocalDateTime.now(), cooldownEnd).getSeconds();
         throw new RateLimitExceededException(
             "Too many OTP requests. Please try again in " + secondsRemaining + " seconds.");
       }
