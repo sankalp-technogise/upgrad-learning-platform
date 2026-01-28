@@ -23,7 +23,7 @@ public class AuthService {
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
-  @SuppressWarnings("null") // JPA save() never returns null
+  @SuppressWarnings("null")
   public void generateOtp(final String email) {
     final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(999_999));
     final String otpHash = hashOtp(otp);
@@ -42,7 +42,7 @@ public class AuthService {
   }
 
   @Transactional
-  @SuppressWarnings("null") // JPA save()/orElseGet() never returns null
+  @SuppressWarnings("null")
   public AuthResponse login(final String email, final String otp) {
     final OtpVerification verification =
         otpRepository
@@ -54,21 +54,11 @@ public class AuthService {
     }
 
     if (verification.getVerified()) {
-      // Optional: Prevent re-use or just allow lookup. Let's allow for now but
-      // typically one-time use.
-      // However, we delete usually?
-      // The original code deleted it. The new schema implies we might keep it?
-      // The user requested `verified` field, implying persistence.
-      // But existing behavior was delete.
-      // Let's stick to validating and marking confirmed, deleting is cleaner for
-      // one-time usage unless user wants audit.
-      // Given the schema change request, I'll delete it for now to match strict
-      // existing behavior or asking user?
-      // Actually, "attempts" and "verified" suggests we KEEP it.
-      // So I will update verified = true and NOT delete.
+      verification.setAttempts(verification.getAttempts() + 1);
+      otpRepository.save(verification);
+      throw new AuthenticationException("Invalid OTP");
     }
 
-    // Verify Hash
     final String inputHash = hashOtp(otp);
     if (!verification.getOtpHash().equals(inputHash)) {
       verification.setAttempts(verification.getAttempts() + 1);
@@ -77,7 +67,7 @@ public class AuthService {
     }
 
     verification.setVerified(true);
-    otpRepository.save(verification); // Mark verified
+    otpRepository.save(verification);
 
     final User user =
         userRepository
@@ -85,13 +75,6 @@ public class AuthService {
             .orElseGet(() -> userRepository.save(User.builder().email(email).build()));
 
     final String token = jwtService.generateToken(user.getId(), user.getEmail());
-
-    // We don't delete anymore? Or maybe we should?
-    // If we keep it, we need to ensure we pick the *latest* unverified or just
-    // latest?
-    // The query is `findFirstByEmailOrderByCreatedAtDesc`.
-    // It will pick the latest. If verified, we might return token again?
-    // Let's assume standard flow: Verify -> Return Token.
 
     return new AuthResponse(token, new UserDto(user.getId(), user.getEmail()));
   }
