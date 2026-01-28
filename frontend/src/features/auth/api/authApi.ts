@@ -30,4 +30,13 @@ export const authApi = {
     } as LoginRequest)
     return data
   },
+
+  logout: async () => {
+    await apiClient.post('/auth/logout')
+  },
+
+  getMe: async () => {
+    const { data } = await apiClient.get<AuthResponse['user']>('/auth/me')
+    return data
+  },
 }

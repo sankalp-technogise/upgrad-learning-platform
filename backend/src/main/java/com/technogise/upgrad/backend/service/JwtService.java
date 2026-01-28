@@ -35,4 +35,18 @@ public class JwtService {
         .withExpiresAt(new Date(System.currentTimeMillis() + expirationMs))
         .sign(Algorithm.HMAC512(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
   }
+
+  public com.auth0.jwt.interfaces.DecodedJWT verifyToken(final String token) {
+    return JWT.require(Algorithm.HMAC512(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+        .build()
+        .verify(token);
+  }
+
+  public String getEmailFromToken(final String token) {
+    return verifyToken(token).getClaim("email").asString();
+  }
+
+  public UUID getUserIdFromToken(final String token) {
+    return UUID.fromString(verifyToken(token).getSubject());
+  }
 }

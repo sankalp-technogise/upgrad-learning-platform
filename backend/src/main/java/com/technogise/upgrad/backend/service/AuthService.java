@@ -79,6 +79,14 @@ public class AuthService {
     return new AuthResponse(token, new UserDto(user.getId(), user.getEmail()));
   }
 
+  @Transactional(readOnly = true)
+  public UserDto getUser(final String email) {
+    return userRepository
+        .findByEmail(email)
+        .map(user -> new UserDto(user.getId(), user.getEmail()))
+        .orElseThrow(() -> new AuthenticationException("User not found"));
+  }
+
   private String hashOtp(String otp) {
     try {
       java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
