@@ -117,4 +117,52 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  void shouldLogoutSuccessfully() throws Exception {
+    mockMvc
+        .perform(post("/api/auth/logout"))
+        .andExpect(status().isOk())
+        .andExpect(
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie()
+                .value("token", ""))
+        .andExpect(
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie()
+                .maxAge("token", 0));
+  }
+
+  @Test
+  void shouldReturnCurrentUser() throws Exception {
+    UUID userId = UUID.randomUUID();
+    String email = "test@example.com";
+    UserDto userDto = new UserDto(userId, email);
+
+    when(authService.getUser(email)).thenReturn(userDto);
+
+    // Mock the filter to populate SecurityContext with email as principal
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              org.springframework.security.core.Authentication auth =
+                  new org.springframework.security.authentication
+                      .UsernamePasswordAuthenticationToken(
+                      email, null, java.util.Collections.emptyList());
+              org.springframework.security.core.context.SecurityContextHolder.getContext()
+                  .setAuthentication(auth);
+              jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+              chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
+              return null;
+            })
+        .when(jwtAuthenticationFilter)
+        .doFilter(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any());
+
+    mockMvc
+        .perform(
+            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/auth/me"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(userId.toString()))
+        .andExpect(jsonPath("$.email").value(email));
+  }
 }
