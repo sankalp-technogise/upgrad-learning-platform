@@ -100,9 +100,20 @@ export const OtpPage: React.FC = () => {
       await authApi.requestOtp(email)
       // Clear OTP inputs for new code
       setOtp(new Array(6).fill(''))
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err)
-      setError('Failed to resend OTP. Please try again.')
+
+      // Check if it's a 429 rate limit error
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { status?: number; data?: string } }).response
+        if (response?.status === 429) {
+          setError(response.data || 'Too many requests. Please wait before trying again.')
+        } else {
+          setError('Failed to resend OTP. Please try again.')
+        }
+      } else {
+        setError('Failed to resend OTP. Please try again.')
+      }
     } finally {
       setIsResending(false)
     }

@@ -9,4 +9,7 @@ public interface OtpRepository extends JpaRepository<OtpVerification, java.util.
   java.util.Optional<OtpVerification> findFirstByEmailOrderByCreatedAtDesc(String email);
 
   java.util.List<OtpVerification> findAllByEmailAndVerifiedFalse(String email);
+
+  java.util.List<OtpVerification> findByEmailAndCreatedAtAfterOrderByCreatedAtAsc(
+      String email, java.time.LocalDateTime createdAt);
 }

@@ -1,10 +1,12 @@
 package com.technogise.upgrad.backend.service;
 
+import com.technogise.upgrad.backend.config.OtpRateLimitConfig;
 import com.technogise.upgrad.backend.dto.AuthResponse;
 import com.technogise.upgrad.backend.dto.UserDto;
 import com.technogise.upgrad.backend.entity.OtpVerification;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.exception.AuthenticationException;
+import com.technogise.upgrad.backend.exception.RateLimitExceededException;
 import com.technogise.upgrad.backend.repository.OtpRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.text.DecimalFormat;
@@ -20,12 +22,16 @@ public class AuthService {
   private final OtpRepository otpRepository;
   private final EmailService emailService;
   private final JwtService jwtService;
+  private final OtpRateLimitConfig rateLimitConfig;
   private static final int MAX_OTP_ATTEMPTS = 5;
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
   @SuppressWarnings("null")
   public void generateOtp(final String email) {
+    // Check rate limit
+    checkRateLimit(email);
+
     // Invalidate all previous unverified OTPs for this email
     final java.util.List<OtpVerification> previousOtps =
         otpRepository.findAllByEmailAndVerifiedFalse(email);
@@ -113,5 +119,28 @@ public class AuthService {
   private void incrementAttempts(OtpVerification verification) {
     verification.setAttempts(verification.getAttempts() + 1);
     otpRepository.save(verification);
+  }
+
+  private void checkRateLimit(final String email) {
+    final LocalDateTime windowStart =
+        LocalDateTime.now().minusSeconds(rateLimitConfig.getTimeWindowSeconds());
+
+    final java.util.List<OtpVerification> recentRequests =
+        otpRepository.findByEmailAndCreatedAtAfterOrderByCreatedAtAsc(email, windowStart);
+
+    if (recentRequests.size() >= rateLimitConfig.getMaxAttempts()) {
+      final LocalDateTime oldestRequest = recentRequests.get(0).getCreatedAt();
+      final LocalDateTime cooldownEnd =
+          oldestRequest
+              .plusSeconds(rateLimitConfig.getTimeWindowSeconds())
+              .plusMinutes(rateLimitConfig.getCooldownMinutes());
+
+      if (LocalDateTime.now().isBefore(cooldownEnd)) {
+        final long secondsRemaining =
+            java.time.Duration.between(LocalDateTime.now(), cooldownEnd).getSeconds();
+        throw new RateLimitExceededException(
+            "Too many OTP requests. Please try again in " + secondsRemaining + " seconds.");
+      }
+    }
   }
 }

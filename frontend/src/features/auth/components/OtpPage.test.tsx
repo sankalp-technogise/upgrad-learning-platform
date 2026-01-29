@@ -338,6 +338,28 @@ describe('OtpPage', () => {
       })
     })
 
+    it('should display rate limit error message on 429 response', async () => {
+      const user = userEvent.setup()
+      const rateLimitError = {
+        response: {
+          status: 429,
+          data: 'Too many OTP requests. Please try again in 45 seconds.',
+        },
+      }
+      vi.mocked(authApi.requestOtp).mockRejectedValue(rateLimitError)
+
+      render(<OtpPage />)
+
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/too many otp requests. please try again in 45 seconds./i)
+        ).toBeInTheDocument()
+      })
+    })
+
     it('should clear error when resend is successful', async () => {
       const user = userEvent.setup()
       // First request fails
