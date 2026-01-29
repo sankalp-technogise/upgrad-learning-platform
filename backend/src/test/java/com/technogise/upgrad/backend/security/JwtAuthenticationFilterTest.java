@@ -7,7 +7,6 @@ import com.technogise.upgrad.backend.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +34,10 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
+  @SuppressWarnings("null")
   void shouldAuthenticateValidToken() throws Exception {
     String token = "valid.token";
     String email = "test@example.com";
-    UUID userId = UUID.randomUUID();
 
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
     when(request.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {cookie});
@@ -53,6 +52,7 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
+  @SuppressWarnings("null")
   void shouldContinueChainWhenNoCookie() throws Exception {
     when(request.getCookies()).thenReturn(null);
 
@@ -65,6 +65,7 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
+  @SuppressWarnings("null")
   void shouldContinueChainWhenNoTokenCookie() throws Exception {
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("other", "cookie");
     when(request.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {cookie});
@@ -78,6 +79,7 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
+  @SuppressWarnings("null")
   void shouldHandleInvalidToken() throws Exception {
     String token = "invalid.token";
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
