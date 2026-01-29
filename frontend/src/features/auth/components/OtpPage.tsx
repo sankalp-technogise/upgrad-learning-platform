@@ -20,6 +20,12 @@ export const OtpPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (otp.length !== 6) {
+      setError('OTP must be exactly 6 digits')
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -61,7 +67,10 @@ export const OtpPage: React.FC = () => {
               id="otp"
               autoFocus
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '').slice(0, 6)
+                setOtp(val)
+              }}
               error={!!error}
               helperText={error}
               inputProps={{
@@ -75,7 +84,7 @@ export const OtpPage: React.FC = () => {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={isLoading}
+              disabled={isLoading || otp.length !== 6}
             >
               {isLoading ? 'Verifying...' : 'Verify'}
             </Button>
