@@ -31,7 +31,10 @@ const indexRoute = createRoute({
       // If successful, we are logged in
       throw redirect({ to: '/home' })
     } catch (error: unknown) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (
+        (error as { response?: { status?: number } }).response?.status === 401 ||
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
         // Not logged in, stay on landing page
         return
       }
@@ -48,7 +51,10 @@ const homeRoute = createRoute({
     try {
       await authApi.getMe()
     } catch (error: unknown) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (
+        (error as { response?: { status?: number } }).response?.status === 401 ||
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
         throw redirect({ to: '/login' })
       }
       throw error
@@ -65,7 +71,10 @@ const loginRoute = createRoute({
       await authApi.getMe()
       throw redirect({ to: '/home' })
     } catch (error: unknown) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (
+        (error as { response?: { status?: number } }).response?.status === 401 ||
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
         // Not logged in, proceed to login page
         return
       }
