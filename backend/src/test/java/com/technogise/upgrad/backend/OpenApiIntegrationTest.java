@@ -12,8 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @org.springframework.context.annotation.Import({
-  com.technogise.upgrad.backend.config.TestConfig.class,
-  com.technogise.upgrad.backend.config.TestContainersConfig.class
+  com.technogise.upgrad.backend.config.TestConfig.class
 })
 @org.springframework.test.context.ActiveProfiles("test")
 class OpenApiIntegrationTest {
@@ -33,6 +32,9 @@ class OpenApiIntegrationTest {
     final HttpResponse<String> response =
         httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+    System.out.println("DEBUG: Status: " + response.statusCode());
+    System.out.println("DEBUG: Body: " + response.body());
+
     assertThat(response.statusCode()).isEqualTo(200);
     assertThat(response.body()).contains("openapi");
   }
@@ -47,6 +49,8 @@ class OpenApiIntegrationTest {
 
     final HttpResponse<String> response =
         httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+    System.out.println("DEBUG: SwaggerUI Status: " + response.statusCode());
 
     assertThat(response.statusCode()).isEqualTo(200);
     assertThat(response.body()).contains("swagger-ui");
@@ -68,13 +72,11 @@ class OpenApiIntegrationTest {
     final String openApiJson = response.body();
 
     // Verify that the OpenAPI spec contains "required" arrays for our DTOs
-    // The spec should have required fields for LoginRequest and OtpRequest
     assertThat(openApiJson)
         .as("OpenAPI spec should contain 'required' field arrays")
         .contains("\"required\"");
 
     // Verify specific required fields for LoginRequest (email, otp)
-    // The JSON structure should include: "required": ["email", "otp"] or similar
     assertThat(openApiJson)
         .as("LoginRequest schema should mark 'email' as required")
         .containsPattern("\"LoginRequest\".*\"required\".*\"email\"");
