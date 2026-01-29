@@ -39,14 +39,6 @@ class OpenApiIntegrationTest {
 
   @Test
   void shouldExposeSwaggerUi() throws Exception {
-    // Swagger UI usually redirects, so we follow redirects or check the redirect
-    // location
-    // HttpClient follows redirects by default usually? No, default is NEVER.
-    // Let's create a client that follows redirects or just check the first
-    // response.
-    // springdoc-openapi-starter-webmvc-ui serves at /swagger-ui/index.html directly
-    // too.
-
     final HttpRequest request =
         HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:" + port + "/swagger-ui/index.html"))

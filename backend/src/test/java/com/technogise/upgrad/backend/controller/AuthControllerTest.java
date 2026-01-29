@@ -24,7 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, com.technogise.upgrad.backend.config.SecurityConfig.class})
 class AuthControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -33,9 +33,28 @@ class AuthControllerTest {
 
   @MockitoBean private AuthService authService;
 
+  @MockitoBean
+  private com.technogise.upgrad.backend.security.JwtAuthenticationFilter jwtAuthenticationFilter;
+
+  @org.junit.jupiter.api.BeforeEach
+  void setUp() throws jakarta.servlet.ServletException, java.io.IOException {
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+              chain.doFilter(invocation.getArgument(0), invocation.getArgument(1));
+              return null;
+            })
+        .when(jwtAuthenticationFilter)
+        .doFilter(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any());
+  }
+
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
+  @SuppressWarnings("null")
   void shouldRequestOtpSuccessfully() throws Exception {
+
     final OtpRequest request = new OtpRequest("test@example.com");
 
     mockMvc
@@ -77,7 +96,10 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.token").value("jwt-token"))
+        .andExpect(
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie()
+                .value("token", "jwt-token"))
+        .andExpect(jsonPath("$.token").value(""))
         .andExpect(jsonPath("$.user.email").value("test@example.com"));
 
     verify(authService).login(request.email(), request.otp());

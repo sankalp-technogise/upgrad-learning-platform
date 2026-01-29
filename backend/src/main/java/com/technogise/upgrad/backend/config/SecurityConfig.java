@@ -34,7 +34,13 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**")
+                auth.requestMatchers(
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
+                            "/api/auth/**"),
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
+                            "/v3/api-docs/**"),
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
+                            "/swagger-ui/**"))
                     .permitAll()
                     .anyRequest()
                     .authenticated())

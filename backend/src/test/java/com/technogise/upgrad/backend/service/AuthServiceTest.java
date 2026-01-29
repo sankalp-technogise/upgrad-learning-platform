@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import com.technogise.upgrad.backend.dto.AuthResponse;
 import com.technogise.upgrad.backend.entity.OtpVerification;
 import com.technogise.upgrad.backend.entity.User;
+import com.technogise.upgrad.backend.exception.AuthenticationException;
 import com.technogise.upgrad.backend.repository.OtpRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -131,8 +132,8 @@ class AuthServiceTest {
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
 
-    final RuntimeException exception =
-        assertThrows(RuntimeException.class, () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("Invalid OTP", exception.getMessage());
     verify(userRepository, never()).save(any());
     verify(otpRepository, times(1)).save(verification); // Updates attempts
@@ -157,9 +158,60 @@ class AuthServiceTest {
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
 
-    final RuntimeException exception =
-        assertThrows(RuntimeException.class, () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("OTP Expired", exception.getMessage());
+  }
+
+  @Test
+  @SuppressWarnings("null")
+  void shouldThrowExceptionWhenMaxAttemptsReached() {
+    final String email = "test@example.com";
+    final String otp = "123456";
+    final String hashedOtp = hashOtp(otp);
+
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(hashedOtp)
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(5) // Max attempts reached
+            .verified(false)
+            .build();
+
+    when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
+        .thenReturn(Optional.of(verification));
+
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
+    assertEquals("Too many attempts", exception.getMessage());
+  }
+
+  @Test
+  @SuppressWarnings("null")
+  void shouldIncrementAttemptsAndThrowExceptionOnFailure() {
+    final String email = "test@example.com";
+    final String otp = "wrong-otp";
+    final String correctOtpHash = hashOtp("correct-otp");
+
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(correctOtpHash) // Mismatch
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
+
+    when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
+        .thenReturn(Optional.of(verification));
+
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
+    assertEquals("Invalid OTP", exception.getMessage());
+
+    verify(otpRepository, times(1)).save(verification);
+    assertEquals(1, verification.getAttempts());
   }
 
   private String hashOtp(String otp) {

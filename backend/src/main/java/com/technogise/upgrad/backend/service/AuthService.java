@@ -20,12 +20,13 @@ public class AuthService {
   private final OtpRepository otpRepository;
   private final EmailService emailService;
   private final JwtService jwtService;
+  private static final int MAX_OTP_ATTEMPTS = 5;
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
   @SuppressWarnings("null")
   public void generateOtp(final String email) {
-    final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(999_999));
+    final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(1_000_000));
     final String otpHash = hashOtp(otp);
 
     final OtpVerification verification =
@@ -53,16 +54,21 @@ public class AuthService {
       throw new AuthenticationException("OTP Expired");
     }
 
+    if (verification.getAttempts() >= MAX_OTP_ATTEMPTS) {
+      throw new AuthenticationException("Too many attempts");
+    }
+
     if (verification.getVerified()) {
-      verification.setAttempts(verification.getAttempts() + 1);
-      otpRepository.save(verification);
+      incrementAttempts(verification);
       throw new AuthenticationException("Invalid OTP");
     }
 
     final String inputHash = hashOtp(otp);
     if (!verification.getOtpHash().equals(inputHash)) {
-      verification.setAttempts(verification.getAttempts() + 1);
-      otpRepository.save(verification);
+      incrementAttempts(verification);
+      if (verification.getAttempts() >= MAX_OTP_ATTEMPTS) {
+        throw new AuthenticationException("Too many attempts");
+      }
       throw new AuthenticationException("Invalid OTP");
     }
 
@@ -95,5 +101,10 @@ public class AuthService {
     } catch (java.security.NoSuchAlgorithmException e) {
       throw new RuntimeException("SHA-256 algorithm not found", e);
     }
+  }
+
+  private void incrementAttempts(OtpVerification verification) {
+    verification.setAttempts(verification.getAttempts() + 1);
+    otpRepository.save(verification);
   }
 }
