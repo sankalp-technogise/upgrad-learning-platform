@@ -136,7 +136,7 @@ describe('OtpPage', () => {
     const user = userEvent.setup()
     const mockResponse = {
       token: 'test-token',
-      user: { id: '1', email: 'test@example.com' },
+      user: { id: '1', email: 'test@example.com', onboardingCompleted: false },
     }
     vi.mocked(authApi.login).mockResolvedValue(mockResponse)
 
@@ -164,7 +164,7 @@ describe('OtpPage', () => {
     const user = userEvent.setup()
     const mockResponse = {
       token: 'test-token',
-      user: { id: '1', email: 'test@example.com' },
+      user: { id: '1', email: 'test@example.com', onboardingCompleted: false },
     }
     vi.mocked(authApi.login).mockResolvedValue(mockResponse)
 
@@ -220,10 +220,13 @@ describe('OtpPage', () => {
     let resolveLogin: () => void
     const loginPromise = new Promise<{
       token: string
-      user: { id: string; email: string }
+      user: { id: string; email: string; onboardingCompleted: boolean }
     }>((resolve) => {
       resolveLogin = () =>
-        resolve({ token: 'test-token', user: { id: '1', email: 'test@example.com' } })
+        resolve({
+          token: 'test-token',
+          user: { id: '1', email: 'test@example.com', onboardingCompleted: false },
+        })
     })
     vi.mocked(authApi.login).mockReturnValue(loginPromise)
 

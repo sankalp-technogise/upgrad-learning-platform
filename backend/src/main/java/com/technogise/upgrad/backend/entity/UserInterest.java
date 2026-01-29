@@ -1,35 +1,36 @@
 package com.technogise.upgrad.backend.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user_interests")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+public class UserInterest {
+  @EmbeddedId private UserInterestId id;
 
-  @Column(nullable = false, unique = true)
-  private String email;
+  @ManyToOne
+  @MapsId("userId")
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-  @Column(name = "onboarding_completed", nullable = false)
-  @Builder.Default
-  private Boolean onboardingCompleted = false;
+  @ManyToOne
+  @MapsId("interestId")
+  @JoinColumn(name = "interest_id", nullable = false)
+  private Interest interest;
 
   @Column(nullable = false, updatable = false)
   @Builder.Default

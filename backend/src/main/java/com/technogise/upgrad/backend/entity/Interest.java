@@ -14,22 +14,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "interests")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Interest {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(nullable = false, unique = true)
-  private String email;
+  private String name;
 
-  @Column(name = "onboarding_completed", nullable = false)
-  @Builder.Default
-  private Boolean onboardingCompleted = false;
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
+  @Column(name = "icon_name", length = 100)
+  private String iconName;
+
+  @Column(name = "display_order", nullable = false)
+  private Integer displayOrder;
 
   @Column(nullable = false, updatable = false)
   @Builder.Default

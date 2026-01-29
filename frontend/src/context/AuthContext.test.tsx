@@ -48,7 +48,7 @@ describe('AuthContext', () => {
   })
 
   it('should set user and token when session is valid', async () => {
-    const mockUser = { id: '1', email: 'test@example.com' }
+    const mockUser = { id: '1', email: 'test@example.com', onboardingCompleted: false }
     vi.mocked(authApi.getMe).mockResolvedValue(mockUser)
 
     const { result } = renderHook(() => useContext(AuthContext), {
@@ -75,7 +75,7 @@ describe('AuthContext', () => {
       expect(result.current?.user).toBeNull()
     })
 
-    const newUser = { id: '2', email: 'new@example.com' }
+    const newUser = { id: '2', email: 'new@example.com', onboardingCompleted: false }
     const newToken = 'new-token'
 
     // Call login
@@ -89,7 +89,7 @@ describe('AuthContext', () => {
   })
 
   it('should clear user and token when logout is called', async () => {
-    const mockUser = { id: '1', email: 'test@example.com' }
+    const mockUser = { id: '1', email: 'test@example.com', onboardingCompleted: false }
     vi.mocked(authApi.getMe).mockResolvedValue(mockUser)
     vi.mocked(authApi.logout).mockResolvedValue(undefined)
 
@@ -114,7 +114,7 @@ describe('AuthContext', () => {
   })
 
   it('should handle logout API failure gracefully', async () => {
-    const mockUser = { id: '1', email: 'test@example.com' }
+    const mockUser = { id: '1', email: 'test@example.com', onboardingCompleted: false }
     vi.mocked(authApi.getMe).mockResolvedValue(mockUser)
     vi.mocked(authApi.logout).mockRejectedValue(new Error('Logout failed'))
 
@@ -142,7 +142,7 @@ describe('AuthContext', () => {
   })
 
   it('should set isAuthenticated to true when user exists', async () => {
-    const mockUser = { id: '1', email: 'test@example.com' }
+    const mockUser = { id: '1', email: 'test@example.com', onboardingCompleted: false }
     vi.mocked(authApi.getMe).mockResolvedValue(mockUser)
 
     const { result } = renderHook(() => useContext(AuthContext), {

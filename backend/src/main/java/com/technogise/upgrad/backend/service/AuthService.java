@@ -93,14 +93,15 @@ public class AuthService {
 
     final String token = jwtService.generateToken(user.getId(), user.getEmail());
 
-    return new AuthResponse(token, new UserDto(user.getId(), user.getEmail()));
+    return new AuthResponse(
+        token, new UserDto(user.getId(), user.getEmail(), user.getOnboardingCompleted()));
   }
 
   @Transactional(readOnly = true)
   public UserDto getUser(final String email) {
     return userRepository
         .findByEmail(email)
-        .map(user -> new UserDto(user.getId(), user.getEmail()))
+        .map(user -> new UserDto(user.getId(), user.getEmail(), user.getOnboardingCompleted()))
         .orElseThrow(() -> new AuthenticationException("User not found"));
   }
 
