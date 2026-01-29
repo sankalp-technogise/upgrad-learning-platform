@@ -108,10 +108,7 @@ export const OtpPage: React.FC = () => {
           >
             Login or Sign Up
           </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
-            Enter your email to receive a login code.
-          </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, mb: 3 }}>
             Enter the 6-digit code sent to {email}.
           </Typography>
 
