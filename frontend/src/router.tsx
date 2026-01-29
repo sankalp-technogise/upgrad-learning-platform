@@ -10,6 +10,7 @@ import { LoginPage } from '@/features/auth/components/LoginPage'
 import { OtpPage } from '@/features/auth/components/OtpPage'
 import { LandingPage } from '@/features/landing/LandingPage'
 import { HomePage } from '@/features/home/HomePage'
+import { authApi } from '@/features/auth/api/authApi'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -22,10 +23,13 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: () => {
-    const token = localStorage.getItem('token')
-    if (token) {
+  beforeLoad: async () => {
+    try {
+      await authApi.getMe()
+      // If successful, we are logged in
       throw redirect({ to: '/home' })
+    } catch {
+      // Not logged in, stay on landing page
     }
   },
   component: LandingPage,
@@ -34,9 +38,10 @@ const indexRoute = createRoute({
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/home',
-  beforeLoad: () => {
-    const token = localStorage.getItem('token')
-    if (!token) {
+  beforeLoad: async () => {
+    try {
+      await authApi.getMe()
+    } catch {
       throw redirect({ to: '/login' })
     }
   },
@@ -46,10 +51,12 @@ const homeRoute = createRoute({
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
-  beforeLoad: () => {
-    const token = localStorage.getItem('token')
-    if (token) {
+  beforeLoad: async () => {
+    try {
+      await authApi.getMe()
       throw redirect({ to: '/home' })
+    } catch {
+      // Not logged in, proceed to login page
     }
   },
   component: LoginPage,

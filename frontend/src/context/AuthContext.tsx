@@ -12,7 +12,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         const user = await authApi.getMe()
         setUser(user)
-        setToken('in-cookie') // Placeholder to indicate auth state
+        setToken('in-cookie')
       } catch {
         // Not authenticated
       } finally {
