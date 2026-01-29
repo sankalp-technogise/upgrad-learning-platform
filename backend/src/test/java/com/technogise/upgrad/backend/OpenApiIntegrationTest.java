@@ -12,8 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @org.springframework.context.annotation.Import({
-  com.technogise.upgrad.backend.config.TestConfig.class,
-  com.technogise.upgrad.backend.config.TestContainersConfig.class
+  com.technogise.upgrad.backend.config.TestConfig.class
 })
 @org.springframework.test.context.ActiveProfiles("test")
 class OpenApiIntegrationTest {
