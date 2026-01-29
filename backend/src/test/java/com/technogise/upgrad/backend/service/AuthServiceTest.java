@@ -49,6 +49,36 @@ class AuthServiceTest {
 
   @Test
   @SuppressWarnings("null")
+  void shouldInvalidatePreviousOtpWhenGeneratingNew() {
+    final String email = "test@example.com";
+
+    // Create a mock previous OTP
+    final OtpVerification previousOtp =
+        OtpVerification.builder()
+            .id(UUID.randomUUID())
+            .email(email)
+            .otpHash("old-hash")
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
+
+    // Mock repository to return the previous OTP
+    when(otpRepository.findAllByEmailAndVerifiedFalse(email))
+        .thenReturn(java.util.List.of(previousOtp));
+
+    // Generate new OTP
+    authService.generateOtp(email);
+
+    // Verify that previous OTP was marked as verified (invalidated)
+    verify(otpRepository, times(2))
+        .save(any(OtpVerification.class)); // 1 for invalidation, 1 for new OTP
+    assertEquals(true, previousOtp.getVerified());
+    verify(emailService, times(1)).sendOtp(eq(email), anyString());
+  }
+
+  @Test
+  @SuppressWarnings("null")
   void shouldLoginSuccessfullyWithValidOtp() {
     final String email = "test@example.com";
     final String otp = "123456";

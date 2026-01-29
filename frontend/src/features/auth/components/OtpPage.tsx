@@ -7,6 +7,7 @@ import { useAuth } from '@/context/useAuth'
 export const OtpPage: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(''))
   const [isLoading, setIsLoading] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Use TanStack Router search params validation
@@ -91,6 +92,22 @@ export const OtpPage: React.FC = () => {
     }
   }
 
+  const handleResendOtp = async () => {
+    setIsResending(true)
+    setError(null)
+
+    try {
+      await authApi.requestOtp(email)
+      // Clear OTP inputs for new code
+      setOtp(new Array(6).fill(''))
+    } catch (err) {
+      console.error(err)
+      setError('Failed to resend OTP. Please try again.')
+    } finally {
+      setIsResending(false)
+    }
+  }
+
   if (!email) {
     return null
   }
@@ -164,6 +181,15 @@ export const OtpPage: React.FC = () => {
               sx={{ textTransform: 'none', color: 'text.secondary' }}
             >
               Back to email
+            </Button>
+            <Button
+              fullWidth
+              variant="text"
+              onClick={handleResendOtp}
+              disabled={isResending}
+              sx={{ textTransform: 'none', color: '#4F46E5', mt: 1 }}
+            >
+              {isResending ? 'Sending...' : 'Resend OTP'}
             </Button>
           </Box>
         </Paper>

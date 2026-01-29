@@ -9,6 +9,7 @@ import { authApi } from '@/features/auth/api/authApi'
 vi.mock('@/features/auth/api/authApi', () => ({
   authApi: {
     login: vi.fn(),
+    requestOtp: vi.fn(),
   },
 }))
 
@@ -246,6 +247,128 @@ describe('OtpPage', () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalled()
+    })
+  })
+
+  describe('Resend OTP', () => {
+    it('should render Resend OTP button', () => {
+      render(<OtpPage />)
+
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      expect(resendButton).toBeInTheDocument()
+    })
+
+    it('should call authApi.requestOtp when Resend OTP is clicked', async () => {
+      const user = userEvent.setup()
+      vi.mocked(authApi.requestOtp).mockResolvedValue(undefined)
+
+      render(<OtpPage />)
+
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      await waitFor(() => {
+        expect(authApi.requestOtp).toHaveBeenCalledWith('test@example.com')
+      })
+    })
+
+    it('should clear OTP inputs after successful resend', async () => {
+      const user = userEvent.setup()
+      vi.mocked(authApi.requestOtp).mockResolvedValue(undefined)
+
+      render(<OtpPage />)
+
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+
+      // Fill all inputs
+      await user.click(inputs[0])
+      await user.paste('123456')
+
+      // Verify inputs are filled
+      expect(inputs[0].value).toBe('1')
+      expect(inputs[5].value).toBe('6')
+
+      // Click resend
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      // Wait for inputs to be cleared
+      await waitFor(() => {
+        expect(inputs[0].value).toBe('')
+        expect(inputs[5].value).toBe('')
+      })
+    })
+
+    it('should show loading state during resend', async () => {
+      const user = userEvent.setup()
+      let resolveResend: () => void
+      const resendPromise = new Promise<void>((resolve) => {
+        resolveResend = resolve
+      })
+      vi.mocked(authApi.requestOtp).mockReturnValue(resendPromise)
+
+      render(<OtpPage />)
+
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      // Button should show sending state
+      expect(screen.getByRole('button', { name: /sending/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /sending/i })).toBeDisabled()
+
+      // Resolve the promise
+      resolveResend!()
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /resend otp/i })).toBeInTheDocument()
+      })
+    })
+
+    it('should display error message when resend fails', async () => {
+      const user = userEvent.setup()
+      vi.mocked(authApi.requestOtp).mockRejectedValue(new Error('Network error'))
+
+      render(<OtpPage />)
+
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      await waitFor(() => {
+        expect(screen.getByText(/failed to resend otp. please try again./i)).toBeInTheDocument()
+      })
+    })
+
+    it('should clear error when resend is successful', async () => {
+      const user = userEvent.setup()
+      // First request fails
+      vi.mocked(authApi.login).mockRejectedValue(new Error('Invalid OTP'))
+
+      render(<OtpPage />)
+
+      const inputs = screen.getAllByRole('textbox')
+
+      // Fill and submit to trigger error
+      await user.click(inputs[0])
+      await user.paste('123456')
+      const submitButton = screen.getByRole('button', { name: /verify \u0026 continue/i })
+      await user.click(submitButton)
+
+      // Wait for error
+      await waitFor(() => {
+        expect(screen.getByText(/invalid otp or expired/i)).toBeInTheDocument()
+      })
+
+      // Mock successful resend
+      vi.mocked(authApi.requestOtp).mockResolvedValue(undefined)
+
+      // Click resend
+      const resendButton = screen.getByRole('button', { name: /resend otp/i })
+      await user.click(resendButton)
+
+      // Error should be cleared
+      await waitFor(() => {
+        expect(screen.queryByText(/invalid otp or expired/i)).not.toBeInTheDocument()
+      })
     })
   })
 })

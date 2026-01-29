@@ -26,6 +26,16 @@ public class AuthService {
   @Transactional
   @SuppressWarnings("null")
   public void generateOtp(final String email) {
+    // Invalidate all previous unverified OTPs for this email
+    final java.util.List<OtpVerification> previousOtps =
+        otpRepository.findAllByEmailAndVerifiedFalse(email);
+    previousOtps.forEach(
+        otp -> {
+          otp.setVerified(true);
+          otpRepository.save(otp);
+        });
+
+    // Generate new OTP
     final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(1_000_000));
     final String otpHash = hashOtp(otp);
 

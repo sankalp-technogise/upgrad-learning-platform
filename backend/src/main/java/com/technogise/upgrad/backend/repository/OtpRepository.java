@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OtpRepository extends JpaRepository<OtpVerification, java.util.UUID> {
   java.util.Optional<OtpVerification> findFirstByEmailOrderByCreatedAtDesc(String email);
+
+  java.util.List<OtpVerification> findAllByEmailAndVerifiedFalse(String email);
 }
