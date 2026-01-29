@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuth } from '@/context/useAuth'
 
@@ -9,22 +9,13 @@ export const OtpPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Use TanStack Router search params validation (assuming defined in route)
-  // For now, loose typing or we define strict interface in route
-  // We'll trust the route definition (step to come)
-  const [email, setEmail] = useState('')
+  // Use TanStack Router search params validation
+  const { email } = useSearch({ from: '/auth/otp' })
 
   const navigate = useNavigate()
 
-  React.useEffect(() => {
-    const storedEmail = sessionStorage.getItem('auth_email')
-    if (storedEmail) {
-      setEmail(storedEmail)
-      sessionStorage.removeItem('auth_email')
-    } else {
-      navigate({ to: '/login' })
-    }
-  }, [navigate])
+  // Removed useEffect for sessionStorage since we rely on URL params now
+  // If email is missing, the route validation would have caught it
   const { login } = useAuth()
 
   const handleChange = (element: HTMLInputElement, index: number) => {

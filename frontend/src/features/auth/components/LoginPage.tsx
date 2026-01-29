@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
     try {
       await authApi.requestOtp(email)
       sessionStorage.setItem('auth_email', email)
-      navigate({ to: '/auth/otp' })
+      navigate({ to: '/auth/otp', search: { email } })
     } catch (err) {
       console.error(err)
       setError('Failed to send OTP. Please try again.')

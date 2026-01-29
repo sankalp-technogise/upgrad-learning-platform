@@ -4,7 +4,9 @@ import {
   createRootRoute,
   Outlet,
   redirect,
+  Navigate,
 } from '@tanstack/react-router'
+import { z } from 'zod'
 
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { OtpPage } from '@/features/auth/components/OtpPage'
@@ -28,8 +30,12 @@ const indexRoute = createRoute({
       await authApi.getMe()
       // If successful, we are logged in
       throw redirect({ to: '/home' })
-    } catch {
-      // Not logged in, stay on landing page
+    } catch (error: unknown) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Not logged in, stay on landing page
+        return
+      }
+      throw error
     }
   },
   component: LandingPage,
@@ -41,8 +47,11 @@ const homeRoute = createRoute({
   beforeLoad: async () => {
     try {
       await authApi.getMe()
-    } catch {
-      throw redirect({ to: '/login' })
+    } catch (error: unknown) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        throw redirect({ to: '/login' })
+      }
+      throw error
     }
   },
   component: HomePage,
@@ -55,17 +64,27 @@ const loginRoute = createRoute({
     try {
       await authApi.getMe()
       throw redirect({ to: '/home' })
-    } catch {
-      // Not logged in, proceed to login page
+    } catch (error: unknown) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Not logged in, proceed to login page
+        return
+      }
+      throw error
     }
   },
   component: LoginPage,
 })
 
+const otpSearchSchema = z.object({
+  email: z.string().email(),
+})
+
 const otpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth/otp',
+  validateSearch: (search) => otpSearchSchema.parse(search),
   component: OtpPage,
+  errorComponent: () => <Navigate to="/login" />,
 })
 
 const routeTree = rootRoute.addChildren([indexRoute, homeRoute, loginRoute, otpRoute])
