@@ -65,11 +65,6 @@ const loginRoute = createRoute({
 const otpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth/otp',
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      email: search.email as string,
-    }
-  },
   component: OtpPage,
 })
 

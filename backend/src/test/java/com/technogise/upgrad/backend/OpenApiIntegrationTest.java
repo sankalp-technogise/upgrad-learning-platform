@@ -81,6 +81,10 @@ class OpenApiIntegrationTest {
         .as("LoginRequest schema should mark 'email' as required")
         .containsPattern("\"LoginRequest\".*\"required\".*\"email\"");
 
+    assertThat(openApiJson)
+        .as("LoginRequest schema should mark 'otp' as required")
+        .containsPattern("\"LoginRequest\".*\"required\".*\"otp\"");
+
     // Verify OtpRequest has required email field
     assertThat(openApiJson)
         .as("OtpRequest schema should mark 'email' as required")

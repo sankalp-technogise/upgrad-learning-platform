@@ -1,27 +1,86 @@
 import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuth } from '@/context/useAuth'
 
 export const OtpPage: React.FC = () => {
-  const [otp, setOtp] = useState('')
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(''))
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Use TanStack Router search params validation (assuming defined in route)
   // For now, loose typing or we define strict interface in route
   // We'll trust the route definition (step to come)
-  const search: { email?: string } = useSearch({ strict: false })
-  const email = search.email || ''
+  const [email, setEmail] = useState('')
 
   const navigate = useNavigate()
+
+  React.useEffect(() => {
+    const storedEmail = sessionStorage.getItem('auth_email')
+    if (storedEmail) {
+      setEmail(storedEmail)
+      sessionStorage.removeItem('auth_email')
+    } else {
+      navigate({ to: '/login' })
+    }
+  }, [navigate])
   const { login } = useAuth()
+
+  const handleChange = (element: HTMLInputElement, index: number) => {
+    if (isNaN(Number(element.value))) return false
+
+    const newOtp = [...otp]
+    newOtp[index] = element.value
+    setOtp(newOtp)
+
+    // Focus next input
+    if (element.value && element.nextSibling) {
+      ;(element.nextSibling as HTMLInputElement).focus()
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace') {
+      if (!otp[index] && index > 0) {
+        const newOtp = [...otp]
+        newOtp[index - 1] = '' // Clear previous if current is empty and backspace hit
+        setOtp(newOtp)
+
+        // Focus previous input
+        const prevParams = e.currentTarget.previousSibling as HTMLInputElement
+        if (prevParams) {
+          prevParams.focus()
+        }
+      } else {
+        const newOtp = [...otp]
+        newOtp[index] = ''
+        setOtp(newOtp)
+      }
+    }
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const val = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (val) {
+      const newOtp = [...otp]
+      val.split('').forEach((char, i) => {
+        if (i < 6) newOtp[i] = char
+      })
+      setOtp(newOtp)
+
+      // Focus the last filled input or the first empty one
+      // We can't easily set focus directly from here without refs, but the user can click.
+      // Optionally we could add refs for each input.
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const otpValue = otp.join('')
 
-    if (otp.length !== 6) {
+    if (otpValue.length !== 6) {
       setError('OTP must be exactly 6 digits')
       return
     }
@@ -30,7 +89,7 @@ export const OtpPage: React.FC = () => {
     setError(null)
 
     try {
-      const response = await authApi.login(email, otp)
+      const response = await authApi.login(email, otpValue)
       login(response.token, response.user)
       navigate({ to: '/' })
     } catch (err) {
@@ -42,54 +101,81 @@ export const OtpPage: React.FC = () => {
   }
 
   if (!email) {
-    return <Typography color="error">Email missing from navigation state.</Typography>
+    return null
   }
 
   return (
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Verify OTP
+          <Typography
+            component="h1"
+            variant="h5"
+            align="center"
+            gutterBottom
+            sx={{ fontWeight: 'bold' }}
+          >
+            Login or Sign Up
+          </Typography>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
+            Enter your email to receive a login code.
           </Typography>
           <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
-            Enter the 6-digit code sent to {email}
+            Enter the 6-digit code sent to {email}.
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="otp"
-              label="OTP Code"
-              type="text"
-              id="otp"
-              autoFocus
-              value={otp}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, '').slice(0, 6)
-                setOtp(val)
-              }}
-              error={!!error}
-              helperText={error}
-              inputProps={{
-                maxLength: 6,
-                letterSpacing: 4,
-                style: { textAlign: 'center', fontSize: '1.2rem' },
-              }}
-            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mb: 2 }}>
+              {otp.map((data, index) => (
+                <TextField
+                  key={index}
+                  value={data}
+                  onChange={(e) => handleChange(e.target as HTMLInputElement, index)}
+                  onKeyDown={(e) =>
+                    handleKeyDown(e as React.KeyboardEvent<HTMLInputElement>, index)
+                  }
+                  onPaste={handlePaste}
+                  inputProps={{
+                    maxLength: 1,
+                    style: { textAlign: 'center', fontSize: '1.5rem', padding: '10px' },
+                  }}
+                  autoFocus={index === 0}
+                  error={!!error}
+                />
+              ))}
+            </Box>
+            {error && (
+              <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>
+                {error}
+              </Typography>
+            )}
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={isLoading || otp.length !== 6}
+              sx={{
+                mt: 3,
+                mb: 2,
+                bgcolor: '#4F46E5', // approximate Purple from screenshot
+                '&:hover': {
+                  bgcolor: '#4338ca',
+                },
+                textTransform: 'none',
+                fontWeight: 'bold',
+                py: 1.5,
+              }}
+              disabled={isLoading || otp.some((digit) => digit === '')}
             >
-              {isLoading ? 'Verifying...' : 'Verify'}
+              {isLoading ? 'Verifying...' : 'Verify & Continue'}
             </Button>
-            <Button fullWidth variant="text" onClick={() => navigate({ to: '/login' })}>
-              Back to Login
+            <Button
+              fullWidth
+              variant="text"
+              onClick={() => navigate({ to: '/login' })}
+              sx={{ textTransform: 'none', color: 'text.secondary' }}
+            >
+              Back to email
             </Button>
           </Box>
         </Paper>
