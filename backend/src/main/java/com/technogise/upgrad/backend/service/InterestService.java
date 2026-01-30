@@ -12,6 +12,7 @@ import com.technogise.upgrad.backend.repository.UserRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,7 @@ public class InterestService {
   }
 
   @Transactional
-  public void saveUserInterests(final UUID userId, final List<UUID> interestIds) {
+  public void saveUserInterests(@NonNull final UUID userId, @NonNull final List<UUID> interestIds) {
     // Validate user exists
     final User user =
         userRepository

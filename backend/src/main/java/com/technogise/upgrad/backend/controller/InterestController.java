@@ -7,6 +7,7 @@ import com.technogise.upgrad.backend.repository.UserRepository;
 import com.technogise.upgrad.backend.service.InterestService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,10 +38,12 @@ public class InterestController {
     // JwtAuthenticationFilter)
     final String email = (String) authentication.getPrincipal();
     final UUID userId =
-        userRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new AuthenticationException("User not found"))
-            .getId();
+        Objects.requireNonNull(
+            userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException("User not found"))
+                .getId(),
+            "User ID cannot be null");
 
     interestService.saveUserInterests(userId, request.interestIds());
     return ResponseEntity.status(HttpStatus.OK).build();

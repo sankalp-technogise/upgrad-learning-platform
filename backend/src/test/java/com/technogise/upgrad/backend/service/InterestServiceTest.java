@@ -13,6 +13,7 @@ import com.technogise.upgrad.backend.repository.UserInterestRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,7 +111,8 @@ class InterestServiceTest {
     when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1, interest2));
 
     // When
-    interestService.saveUserInterests(userId, interestIds);
+    interestService.saveUserInterests(
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
 
     // Then
     verify(userRepository).findById(userId);
@@ -130,7 +132,9 @@ class InterestServiceTest {
     AuthenticationException exception =
         assertThrows(
             AuthenticationException.class,
-            () -> interestService.saveUserInterests(userId, interestIds));
+            () ->
+                interestService.saveUserInterests(
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
 
     assertEquals("User not found", exception.getMessage());
     verify(userRepository).findById(userId);
@@ -150,7 +154,9 @@ class InterestServiceTest {
     IllegalArgumentException exception =
         assertThrows(
             IllegalArgumentException.class,
-            () -> interestService.saveUserInterests(userId, interestIds));
+            () ->
+                interestService.saveUserInterests(
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
 
     assertEquals("One or more interest IDs are invalid", exception.getMessage());
     verify(userRepository).findById(userId);
@@ -166,7 +172,8 @@ class InterestServiceTest {
     when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
-    interestService.saveUserInterests(userId, interestIds);
+    interestService.saveUserInterests(
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
 
     // Then
     verify(userRepository)
@@ -194,7 +201,8 @@ class InterestServiceTest {
     when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
-    interestService.saveUserInterests(userId, interestIds);
+    interestService.saveUserInterests(
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
 
     // Then
     verify(userInterestRepository).saveAll(any());
@@ -210,7 +218,8 @@ class InterestServiceTest {
     when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
-    interestService.saveUserInterests(userId, interestIds);
+    interestService.saveUserInterests(
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
 
     // Then
     verify(userInterestRepository).deleteByIdUserId(userId);
