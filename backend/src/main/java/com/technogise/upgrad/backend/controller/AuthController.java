@@ -6,6 +6,7 @@ import com.technogise.upgrad.backend.dto.OtpRequest;
 import com.technogise.upgrad.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,9 @@ public class AuthController {
     return ResponseEntity.ok().build();
   }
 
+  @Value("${app.security.cookie.secure}")
+  private boolean isCookieSecure;
+
   @PostMapping("/login")
   @SuppressWarnings("null")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody final LoginRequest request) {
@@ -35,7 +39,7 @@ public class AuthController {
     org.springframework.http.ResponseCookie cookie =
         org.springframework.http.ResponseCookie.from("token", response.token())
             .httpOnly(true)
-            .secure(false) // Set to true in production with HTTPS
+            .secure(isCookieSecure) // Set to true in production with HTTPS
             .path("/")
             .maxAge(24 * 60 * 60) // 1 day
             .sameSite("Strict")
@@ -52,7 +56,7 @@ public class AuthController {
     org.springframework.http.ResponseCookie cookie =
         org.springframework.http.ResponseCookie.from("token", "")
             .httpOnly(true)
-            .secure(false)
+            .secure(isCookieSecure)
             .path("/")
             .maxAge(0) // Expire immediately
             .sameSite("Strict")
