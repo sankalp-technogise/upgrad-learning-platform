@@ -75,7 +75,7 @@ class AuthServiceTest {
             .build();
 
     // Mock repository to return the previous OTP
-    when(otpRepository.findAllByEmailAndVerifiedFalse(email))
+    when(otpRepository.findAllByEmailAndVerified(email, false))
         .thenReturn(java.util.List.of(previousOtp));
 
     // Mock rate limit config
@@ -131,13 +131,17 @@ class AuthServiceTest {
     // Create 3 requests, but oldest is beyond cooldown (> 90 seconds + 2 minutes)
     final java.util.List<OtpVerification> oldRequests =
         java.util.List.of(
-            OtpVerification.builder().email(email).createdAt(now.minusMinutes(5)).build());
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(5)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(4)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(3)).build());
 
     // Mock rate limit config
     when(rateLimitConfig.getTimeWindowSeconds()).thenReturn(90);
+    when(rateLimitConfig.getMaxAttempts()).thenReturn(3);
+    when(rateLimitConfig.getCooldownMinutes()).thenReturn(2);
     when(otpRepository.findByEmailAndCreatedAtAfterOrderByCreatedAtAsc(eq(email), any()))
         .thenReturn(oldRequests);
-    when(otpRepository.findAllByEmailAndVerifiedFalse(email)).thenReturn(java.util.List.of());
+    when(otpRepository.findAllByEmailAndVerified(email, false)).thenReturn(java.util.List.of());
 
     // Should NOT throw exception
     assertDoesNotThrow(() -> authService.generateOtp(email));
@@ -168,6 +172,7 @@ class AuthServiceTest {
         .thenReturn(Optional.of(verification));
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
     when(jwtService.generateToken(userId, email)).thenReturn(token);
+    when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
     final AuthResponse response = authService.login(email, otp);
 
@@ -202,6 +207,7 @@ class AuthServiceTest {
     when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
     when(userRepository.save(any(User.class))).thenReturn(newUser);
     when(jwtService.generateToken(userId, email)).thenReturn(token);
+    when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
     final AuthResponse response = authService.login(email, otp);
 
@@ -228,6 +234,7 @@ class AuthServiceTest {
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
+    when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
     final AuthenticationException exception =
         assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
@@ -277,6 +284,7 @@ class AuthServiceTest {
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
+    when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
     final AuthenticationException exception =
         assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
@@ -301,6 +309,7 @@ class AuthServiceTest {
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
+    when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
     final AuthenticationException exception =
         assertThrows(AuthenticationException.class, () -> authService.login(email, otp));

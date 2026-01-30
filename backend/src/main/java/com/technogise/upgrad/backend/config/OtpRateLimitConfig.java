@@ -13,4 +13,5 @@ public class OtpRateLimitConfig {
   private int maxAttempts = 3;
   private int timeWindowSeconds = 90;
   private int cooldownMinutes = 2;
+  private int maxVerificationAttempts = 5;
 }

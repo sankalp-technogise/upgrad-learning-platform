@@ -23,7 +23,6 @@ public class AuthService {
   private final EmailService emailService;
   private final JwtService jwtService;
   private final OtpRateLimitConfig rateLimitConfig;
-  private static final int MAX_OTP_ATTEMPTS = 5;
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
@@ -34,7 +33,7 @@ public class AuthService {
 
     // Invalidate all previous unverified OTPs for this email
     final java.util.List<OtpVerification> previousOtps =
-        otpRepository.findAllByEmailAndVerifiedFalse(email);
+        otpRepository.findAllByEmailAndVerified(email, false);
     previousOtps.forEach(
         otp -> {
           otp.setVerified(true);
@@ -70,7 +69,7 @@ public class AuthService {
       throw new AuthenticationException("OTP Expired");
     }
 
-    if (verification.getAttempts() >= MAX_OTP_ATTEMPTS) {
+    if (verification.getAttempts() >= rateLimitConfig.getMaxVerificationAttempts()) {
       throw new AuthenticationException("Too many attempts");
     }
 
@@ -82,7 +81,7 @@ public class AuthService {
     final String inputHash = hashOtp(otp);
     if (!verification.getOtpHash().equals(inputHash)) {
       incrementAttempts(verification);
-      if (verification.getAttempts() >= MAX_OTP_ATTEMPTS) {
+      if (verification.getAttempts() >= rateLimitConfig.getMaxVerificationAttempts()) {
         throw new AuthenticationException("Too many attempts");
       }
       throw new AuthenticationException("Invalid OTP");
