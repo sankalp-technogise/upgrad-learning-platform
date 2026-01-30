@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
   }
 
+  @ExceptionHandler(RateLimitExceededException.class)
+  public ResponseEntity<String> handleRateLimitException(final RateLimitExceededException ex) {
+    logger.warn("Rate limit exceeded: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleGenericException(final Exception ex) {
     logger.error("Unexpected error", ex);

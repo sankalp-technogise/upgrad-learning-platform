@@ -3,10 +3,35 @@ import { Box, Button, TextField, Typography, Paper, Container } from '@mui/mater
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuth } from '@/context/useAuth'
+import {
+  ERROR_OTP_LENGTH,
+  ERROR_INVALID_OTP,
+  ERROR_RATE_LIMIT_DEFAULT,
+  ERROR_RESEND_FAILED,
+  BUTTON_VERIFYING,
+  BUTTON_VERIFY,
+  BUTTON_BACK,
+  BUTTON_RESEND,
+  BUTTON_SENDING,
+} from '@/features/auth/constants'
+import {
+  containerStyles,
+  paperStyles,
+  titleStyles,
+  subtitleStyles,
+  formBoxStyles,
+  otpInputContainerStyles,
+  otpInputStyles,
+  errorTextStyles,
+  verifyButtonStyles,
+  backButtonStyles,
+  resendButtonStyles,
+} from './OtpPage.styles'
 
 export const OtpPage: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(''))
   const [isLoading, setIsLoading] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Use TanStack Router search params validation
@@ -14,7 +39,7 @@ export const OtpPage: React.FC = () => {
 
   const navigate = useNavigate()
 
-  // Removed useEffect for sessionStorage since we rely on URL params now
+  // Moved useEffect for sessionStorage since we rely on URL params now
   // If email is missing, the route validation would have caught it
   const { login } = useAuth()
 
@@ -72,7 +97,7 @@ export const OtpPage: React.FC = () => {
     const otpValue = otp.join('')
 
     if (otpValue.length !== 6) {
-      setError('OTP must be exactly 6 digits')
+      setError(ERROR_OTP_LENGTH)
       return
     }
 
@@ -85,9 +110,36 @@ export const OtpPage: React.FC = () => {
       navigate({ to: '/' })
     } catch (err) {
       console.error(err)
-      setError('Invalid OTP or expired.')
+      setError(ERROR_INVALID_OTP)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    setIsResending(true)
+    setError(null)
+
+    try {
+      await authApi.requestOtp(email)
+      // Clear OTP inputs for new code
+      setOtp(new Array(6).fill(''))
+    } catch (err: unknown) {
+      console.error(err)
+
+      // Check if it's a 429 rate limit error
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { status?: number; data?: string } }).response
+        if (response?.status === 429) {
+          setError(response.data || ERROR_RATE_LIMIT_DEFAULT)
+        } else {
+          setError(ERROR_RESEND_FAILED)
+        }
+      } else {
+        setError(ERROR_RESEND_FAILED)
+      }
+    } finally {
+      setIsResending(false)
     }
   }
 
@@ -97,23 +149,17 @@ export const OtpPage: React.FC = () => {
 
   return (
     <Container maxWidth="xs">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
-          <Typography
-            component="h1"
-            variant="h5"
-            align="center"
-            gutterBottom
-            sx={{ fontWeight: 'bold' }}
-          >
+      <Box sx={containerStyles}>
+        <Paper elevation={3} sx={paperStyles}>
+          <Typography component="h1" variant="h5" align="center" gutterBottom sx={titleStyles}>
             Login or Sign Up
           </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" align="center" sx={subtitleStyles}>
             Enter the 6-digit code sent to {email}.
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mb: 2 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={formBoxStyles}>
+            <Box sx={otpInputContainerStyles}>
               {otp.map((data, index) => (
                 <TextField
                   key={index}
@@ -125,7 +171,7 @@ export const OtpPage: React.FC = () => {
                   onPaste={handlePaste}
                   inputProps={{
                     maxLength: 1,
-                    style: { textAlign: 'center', fontSize: '1.5rem', padding: '10px' },
+                    style: otpInputStyles,
                   }}
                   autoFocus={index === 0}
                   error={!!error}
@@ -133,7 +179,7 @@ export const OtpPage: React.FC = () => {
               ))}
             </Box>
             {error && (
-              <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>
+              <Typography color="error" variant="body2" align="center" sx={errorTextStyles}>
                 {error}
               </Typography>
             )}
@@ -142,28 +188,27 @@ export const OtpPage: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                bgcolor: '#4F46E5', // approximate Purple from screenshot
-                '&:hover': {
-                  bgcolor: '#4338ca',
-                },
-                textTransform: 'none',
-                fontWeight: 'bold',
-                py: 1.5,
-              }}
+              sx={verifyButtonStyles}
               disabled={isLoading || otp.some((digit) => digit === '')}
             >
-              {isLoading ? 'Verifying...' : 'Verify & Continue'}
+              {isLoading ? BUTTON_VERIFYING : BUTTON_VERIFY}
             </Button>
             <Button
               fullWidth
               variant="text"
               onClick={() => navigate({ to: '/login' })}
-              sx={{ textTransform: 'none', color: 'text.secondary' }}
+              sx={backButtonStyles}
             >
-              Back to email
+              {BUTTON_BACK}
+            </Button>
+            <Button
+              fullWidth
+              variant="text"
+              onClick={handleResendOtp}
+              disabled={isResending}
+              sx={resendButtonStyles}
+            >
+              {isResending ? BUTTON_SENDING : BUTTON_RESEND}
             </Button>
           </Box>
         </Paper>
