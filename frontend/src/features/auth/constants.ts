@@ -1,0 +1,5 @@
+export const ERROR_SEND_OTP = 'Failed to send OTP. Please try again.'
+export const BUTTON_SENDING = 'Sending...'
+export const BUTTON_SEND_OTP = 'Send OTP'
+export const AUTH_EMAIL_STORAGE_KEY = 'auth_email'
+export const OTP_ROUTE_PATH = '/auth/otp'
