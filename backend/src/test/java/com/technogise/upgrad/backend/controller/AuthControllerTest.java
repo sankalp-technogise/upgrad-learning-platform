@@ -52,7 +52,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldRequestOtpSuccessfully() throws Exception {
 
     final OtpRequest request = new OtpRequest("test@example.com");
@@ -68,7 +67,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenRequestOtpWithInvalidEmail() throws Exception {
     final OtpRequest request = new OtpRequest("invalid");
 
@@ -81,7 +79,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldLoginSuccessfully() throws Exception {
     final LoginRequest request = new LoginRequest("test@example.com", "123456");
     final UUID userId = UUID.randomUUID();
@@ -106,7 +103,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenLoginWithInvalidEmail() throws Exception {
     final LoginRequest request = new LoginRequest("invalid", "123456");
 

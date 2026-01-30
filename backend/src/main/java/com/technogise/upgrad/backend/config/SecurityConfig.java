@@ -32,7 +32,8 @@ public class SecurityConfig {
     // Spring Security 6.x requires explicit CSRF token handling
     org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler requestHandler =
         new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler();
-    // Setting to empty string allows Angular/React apps to work with CSRF
+    // Setting the CSRF request attribute name to null allows Angular/React apps to
+    // work with CSRF
     requestHandler.setCsrfRequestAttributeName(null);
 
     http.csrf(

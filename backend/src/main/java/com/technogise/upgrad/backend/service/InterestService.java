@@ -38,6 +38,10 @@ public class InterestService {
 
   @Transactional
   public void saveUserInterests(@NonNull final UUID userId, @NonNull final List<UUID> interestIds) {
+    if (interestIds == null || interestIds.isEmpty()) {
+      throw new IllegalArgumentException("At least one interest must be selected");
+    }
+
     // Validate user exists
     final User user =
         userRepository

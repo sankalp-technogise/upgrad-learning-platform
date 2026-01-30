@@ -15,7 +15,11 @@ apiClient.interceptors.request.use((config) => {
   const cookies = document.cookie.split('; ')
   const xsrfCookie = cookies.find((cookie) => cookie.startsWith('XSRF-TOKEN='))
   if (xsrfCookie) {
-    const token = decodeURIComponent(xsrfCookie.split('=')[1])
+    const eqIndex = xsrfCookie.indexOf('=')
+    if (eqIndex === -1) {
+      return config // No '=' found, skip setting the token
+    }
+    const token = decodeURIComponent(xsrfCookie.slice(eqIndex + 1))
     config.headers['X-XSRF-TOKEN'] = token
   }
   return config

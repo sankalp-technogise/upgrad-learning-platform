@@ -165,6 +165,25 @@ class InterestServiceTest {
   }
 
   @Test
+  void shouldThrowExceptionWhenInterestListIsEmpty() {
+    // Given
+    List<UUID> interestIds = List.of();
+
+    // When / Then
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                interestService.saveUserInterests(
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
+
+    assertEquals("At least one interest must be selected", exception.getMessage());
+    verify(userRepository, never()).findById(any());
+    verify(interestRepository, never()).findAllById(any());
+    verify(userInterestRepository, never()).saveAll(any());
+  }
+
+  @Test
   void shouldMarkOnboardingAsCompletedForNewUser() {
     // Given
     List<UUID> interestIds = List.of(interest1.getId());

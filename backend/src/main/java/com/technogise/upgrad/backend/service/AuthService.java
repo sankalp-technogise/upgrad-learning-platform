@@ -26,7 +26,6 @@ public class AuthService {
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
-  @SuppressWarnings("null")
   public void generateOtp(final String email) {
     // Check rate limit
     checkRateLimit(email);
@@ -58,7 +57,6 @@ public class AuthService {
   }
 
   @Transactional
-  @SuppressWarnings("null")
   public AuthResponse login(final String email, final String otp) {
     final OtpVerification verification =
         otpRepository

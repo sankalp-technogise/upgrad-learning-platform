@@ -5,6 +5,7 @@ import {
   Outlet,
   redirect,
   Navigate,
+  isRedirect,
 } from '@tanstack/react-router'
 import { z } from 'zod'
 
@@ -32,6 +33,9 @@ const indexRoute = createRoute({
       // If successful, we are logged in
       throw redirect({ to: '/home' })
     } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
       if (
         (error as { response?: { status?: number } }).response?.status === 401 ||
         (error as { response?: { status?: number } }).response?.status === 403
@@ -56,6 +60,9 @@ const homeRoute = createRoute({
         throw redirect({ to: '/onboarding/interests' })
       }
     } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
       if (
         (error as { response?: { status?: number } }).response?.status === 401 ||
         (error as { response?: { status?: number } }).response?.status === 403
@@ -79,6 +86,9 @@ const onboardingRoute = createRoute({
         throw redirect({ to: '/home' })
       }
     } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
       if (
         (error as { response?: { status?: number } }).response?.status === 401 ||
         (error as { response?: { status?: number } }).response?.status === 403
@@ -99,6 +109,9 @@ const loginRoute = createRoute({
       await authApi.getMe()
       throw redirect({ to: '/home' })
     } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
       if (
         (error as { response?: { status?: number } }).response?.status === 401 ||
         (error as { response?: { status?: number } }).response?.status === 403
