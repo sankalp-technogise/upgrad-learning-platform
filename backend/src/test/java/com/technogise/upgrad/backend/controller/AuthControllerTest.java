@@ -99,7 +99,7 @@ class AuthControllerTest {
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie()
                 .value("token", "jwt-token"))
-        .andExpect(jsonPath("$.token").value(""))
+        .andExpect(jsonPath("$.token").value("jwt-token"))
         .andExpect(jsonPath("$.user.email").value("test@example.com"));
 
     verify(authService).login(request.email(), request.otp());

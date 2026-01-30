@@ -31,6 +31,9 @@ public class AuthController {
   @Value("${app.security.cookie.secure}")
   private boolean isCookieSecure;
 
+  @Value("${app.security.cookie.same-site:Strict}")
+  private String cookieSameSite;
+
   @PostMapping("/login")
   @SuppressWarnings("null")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody final LoginRequest request) {
@@ -43,13 +46,13 @@ public class AuthController {
             .secure(isCookieSecure) // Set to true in production with HTTPS
             .path("/")
             .maxAge(COOKIE_MAX_AGE_SECONDS) // 1 day
-            .sameSite("Strict")
+            .sameSite(cookieSameSite)
             .build();
 
     // Return response with cookie
     return ResponseEntity.ok()
         .header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString())
-        .body(new AuthResponse("", response.user())); // Don't send token in body
+        .body(new AuthResponse(response.token(), response.user())); // Send token in body as well
   }
 
   @PostMapping("/logout")
@@ -60,7 +63,7 @@ public class AuthController {
             .secure(isCookieSecure)
             .path("/")
             .maxAge(0) // Expire immediately
-            .sameSite("Strict")
+            .sameSite(cookieSameSite)
             .build();
 
     return ResponseEntity.ok()
