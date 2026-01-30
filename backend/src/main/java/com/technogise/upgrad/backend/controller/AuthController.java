@@ -40,14 +40,14 @@ public class AuthController {
     final AuthResponse response = authService.login(request.email(), request.otp());
 
     // Create HttpOnly Cookie
-    org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie
-        .from("token", response.token())
-        .httpOnly(true)
-        .secure(isCookieSecure) // Set to true in production with HTTPS
-        .path("/")
-        .maxAge(COOKIE_MAX_AGE_SECONDS) // 1 day
-        .sameSite(cookieSameSite)
-        .build();
+    org.springframework.http.ResponseCookie cookie =
+        org.springframework.http.ResponseCookie.from("token", response.token())
+            .httpOnly(true)
+            .secure(isCookieSecure) // Set to true in production with HTTPS
+            .path("/")
+            .maxAge(COOKIE_MAX_AGE_SECONDS) // 1 day
+            .sameSite(cookieSameSite)
+            .build();
 
     // Return response with cookie
     return ResponseEntity.ok()
@@ -57,13 +57,14 @@ public class AuthController {
 
   @PostMapping("/logout")
   public ResponseEntity<Void> logout() {
-    org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("token", "")
-        .httpOnly(true)
-        .secure(isCookieSecure) // Set to true in production with HTTPS
-        .path("/")
-        .maxAge(0) // Expire immediately
-        .sameSite(cookieSameSite)
-        .build();
+    org.springframework.http.ResponseCookie cookie =
+        org.springframework.http.ResponseCookie.from("token", "")
+            .httpOnly(true)
+            .secure(isCookieSecure) // Set to true in production with HTTPS
+            .path("/")
+            .maxAge(0) // Expire immediately
+            .sameSite(cookieSameSite)
+            .build();
 
     return ResponseEntity.ok()
         .header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString())

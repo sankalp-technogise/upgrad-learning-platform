@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import com.technogise.upgrad.backend.config.OtpRateLimitConfig;
 import com.technogise.upgrad.backend.dto.AuthResponse;
-import com.technogise.upgrad.backend.dto.UserDto;
 import com.technogise.upgrad.backend.entity.OtpVerification;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.exception.AuthenticationException;
@@ -34,19 +33,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-  @Mock
-  private UserRepository userRepository;
-  @Mock
-  private OtpRepository otpRepository;
-  @Mock
-  private EmailService emailService;
-  @Mock
-  private JwtService jwtService;
-  @Mock
-  private OtpRateLimitConfig rateLimitConfig;
+  @Mock private UserRepository userRepository;
+  @Mock private OtpRepository otpRepository;
+  @Mock private EmailService emailService;
+  @Mock private JwtService jwtService;
+  @Mock private OtpRateLimitConfig rateLimitConfig;
 
-  @InjectMocks
-  private AuthService authService;
+  @InjectMocks private AuthService authService;
 
   @Test
   @SuppressWarnings("null")
@@ -71,14 +64,15 @@ class AuthServiceTest {
     final String email = "test@example.com";
 
     // Create a mock previous OTP
-    final OtpVerification previousOtp = OtpVerification.builder()
-        .id(UUID.randomUUID())
-        .email(email)
-        .otpHash("old-hash")
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification previousOtp =
+        OtpVerification.builder()
+            .id(UUID.randomUUID())
+            .email(email)
+            .otpHash("old-hash")
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     // Mock repository to return the previous OTP
     when(otpRepository.findAllByEmailAndVerified(email, false))
@@ -107,10 +101,11 @@ class AuthServiceTest {
     final LocalDateTime now = LocalDateTime.now();
 
     // Create 3 recent OTP requests (within 90 seconds)
-    final java.util.List<OtpVerification> recentRequests = java.util.List.of(
-        OtpVerification.builder().email(email).createdAt(now.minusSeconds(60)).build(),
-        OtpVerification.builder().email(email).createdAt(now.minusSeconds(30)).build(),
-        OtpVerification.builder().email(email).createdAt(now.minusSeconds(10)).build());
+    final java.util.List<OtpVerification> recentRequests =
+        java.util.List.of(
+            OtpVerification.builder().email(email).createdAt(now.minusSeconds(60)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusSeconds(30)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusSeconds(10)).build());
 
     // Mock rate limit config
     when(rateLimitConfig.getTimeWindowSeconds()).thenReturn(90);
@@ -120,8 +115,8 @@ class AuthServiceTest {
         .thenReturn(recentRequests);
 
     // Should throw exception
-    final RateLimitExceededException exception = assertThrows(RateLimitExceededException.class,
-        () -> authService.generateOtp(email));
+    final RateLimitExceededException exception =
+        assertThrows(RateLimitExceededException.class, () -> authService.generateOtp(email));
 
     assertTrue(exception.getMessage().contains("Too many OTP requests"));
     assertTrue(exception.getMessage().contains("seconds"));
@@ -134,10 +129,11 @@ class AuthServiceTest {
     final LocalDateTime now = LocalDateTime.now();
 
     // Create 3 requests, but oldest is beyond cooldown (> 90 seconds + 2 minutes)
-    final java.util.List<OtpVerification> oldRequests = java.util.List.of(
-        OtpVerification.builder().email(email).createdAt(now.minusMinutes(5)).build(),
-        OtpVerification.builder().email(email).createdAt(now.minusMinutes(4)).build(),
-        OtpVerification.builder().email(email).createdAt(now.minusMinutes(3)).build());
+    final java.util.List<OtpVerification> oldRequests =
+        java.util.List.of(
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(5)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(4)).build(),
+            OtpVerification.builder().email(email).createdAt(now.minusMinutes(3)).build());
 
     // Mock rate limit config
     when(rateLimitConfig.getTimeWindowSeconds()).thenReturn(90);
@@ -161,13 +157,14 @@ class AuthServiceTest {
     final String token = "jwt-token";
     final String hashedOtp = hashOtp(otp);
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(hashedOtp)
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(hashedOtp)
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     final User user = User.builder().id(userId).email(email).build();
 
@@ -194,13 +191,14 @@ class AuthServiceTest {
     final String token = "new-jwt-token";
     final String hashedOtp = hashOtp(otp);
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(hashedOtp)
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(hashedOtp)
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     final User newUser = User.builder().id(userId).email(email).build();
 
@@ -225,20 +223,21 @@ class AuthServiceTest {
     final String otp = "wrong-otp";
     final String correctOtpHash = hashOtp("correct-otp");
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(correctOtpHash)
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(correctOtpHash)
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
     when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
-    final AuthenticationException exception = assertThrows(AuthenticationException.class,
-        () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("Invalid OTP", exception.getMessage());
     verify(userRepository, never()).save(any());
     verify(otpRepository, times(1)).save(verification); // Updates attempts
@@ -251,19 +250,20 @@ class AuthServiceTest {
     final String hashedOtp = hashOtp(otp);
     assertNotNull(hashedOtp);
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(hashedOtp)
-        .expiresAt(LocalDateTime.now().minusMinutes(1))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(hashedOtp)
+            .expiresAt(LocalDateTime.now().minusMinutes(1))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
 
-    final AuthenticationException exception = assertThrows(AuthenticationException.class,
-        () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("OTP Expired", exception.getMessage());
   }
 
@@ -273,20 +273,21 @@ class AuthServiceTest {
     final String otp = "123456";
     final String hashedOtp = hashOtp(otp);
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(hashedOtp)
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(5) // Max attempts reached
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(hashedOtp)
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(5) // Max attempts reached
+            .verified(false)
+            .build();
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
     when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
-    final AuthenticationException exception = assertThrows(AuthenticationException.class,
-        () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("Too many attempts", exception.getMessage());
   }
 
@@ -297,20 +298,21 @@ class AuthServiceTest {
     final String otp = "wrong-otp";
     final String correctOtpHash = hashOtp("correct-otp");
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(correctOtpHash) // Mismatch
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(correctOtpHash) // Mismatch
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
 
     when(otpRepository.findFirstByEmailOrderByCreatedAtDesc(email))
         .thenReturn(Optional.of(verification));
     when(rateLimitConfig.getMaxVerificationAttempts()).thenReturn(5);
 
-    final AuthenticationException exception = assertThrows(AuthenticationException.class,
-        () -> authService.login(email, otp));
+    final AuthenticationException exception =
+        assertThrows(AuthenticationException.class, () -> authService.login(email, otp));
     assertEquals("Invalid OTP", exception.getMessage());
 
     verify(otpRepository, times(1)).save(verification);

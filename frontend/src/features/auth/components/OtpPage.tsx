@@ -52,7 +52,7 @@ export const OtpPage: React.FC = () => {
 
     // Focus next input
     if (element.value && element.nextSibling) {
-      ; (element.nextSibling as HTMLInputElement).focus()
+      ;(element.nextSibling as HTMLInputElement).focus()
     }
   }
 
