@@ -19,7 +19,7 @@ interface InterestCardProps {
 
 // Map icon names to Lucide icon components matching the reference design
 const iconMap: Record<string, LucideIcon> = {
-  puzzle: Binary, // Python Programming (Approximation)
+  puzzle: Binary, // Python Programming
   chart: LineChart, // Data Science
   palette: Palette, // UI/UX Design
   megaphone: Megaphone, // Digital Marketing
@@ -39,20 +39,17 @@ export function InterestCard({ interest, selected, onToggle }: InterestCardProps
       className={`interest-card ${selected ? 'selected' : ''}`}
       aria-pressed={selected}
     >
+      {/* Radio button indicator */}
+      <div className="interest-card__radio">
+        <div className="interest-card__radio-inner" />
+      </div>
+
       <div className="interest-card__icon">
         <IconComponent size={32} strokeWidth={1.5} />
       </div>
       <div className="interest-card__content">
         <h3 className="interest-card__name">{interest.name}</h3>
-        {interest.description && (
-          <p className="interest-card__description">{interest.description}</p>
-        )}
       </div>
-      {selected && (
-        <div className="interest-card__check" aria-label="Selected">
-          ✓
-        </div>
-      )}
     </button>
   )
 }
