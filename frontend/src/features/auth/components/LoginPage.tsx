@@ -2,9 +2,14 @@ import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/api/authApi'
-
-const AUTH_EMAIL_STORAGE_KEY = 'auth_email'
-const OTP_ROUTE_PATH = '/auth/otp'
+import {
+  AUTH_EMAIL_STORAGE_KEY,
+  BUTTON_SEND_OTP,
+  BUTTON_SENDING,
+  ERROR_SEND_OTP,
+  OTP_ROUTE_PATH,
+} from '../constants'
+import { loginPaperStyles, pageContainerStyles, submitButtonStyles } from './LoginPage.styles'
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -23,7 +28,7 @@ export const LoginPage: React.FC = () => {
       navigate({ to: OTP_ROUTE_PATH, search: { email } })
     } catch (err) {
       console.error(err)
-      setError('Failed to send OTP. Please try again.')
+      setError(ERROR_SEND_OTP)
     } finally {
       setIsLoading(false)
     }
@@ -73,40 +78,11 @@ export const LoginPage: React.FC = () => {
               sx={submitButtonStyles}
               disabled={isLoading}
             >
-              {isLoading ? 'Sending...' : 'Send OTP'}
+              {isLoading ? BUTTON_SENDING : BUTTON_SEND_OTP}
             </Button>
           </Box>
         </Paper>
       </Container>
     </Box>
   )
-}
-
-const pageContainerStyles = {
-  minHeight: '100vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#f5f5f5',
-}
-
-const loginPaperStyles = {
-  p: 5,
-  width: '100%',
-  borderRadius: 3,
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-}
-
-const submitButtonStyles = {
-  mt: 4,
-  mb: 1,
-  py: 1.5,
-  textTransform: 'none',
-  fontSize: '1rem',
-  fontWeight: 600,
-  borderRadius: 2,
-  backgroundColor: '#5c6bc0',
-  '&:hover': {
-    backgroundColor: '#3f51b5',
-  },
 }

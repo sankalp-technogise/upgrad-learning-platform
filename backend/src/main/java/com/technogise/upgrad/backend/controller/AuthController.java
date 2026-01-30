@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class AuthController {
   private final AuthService authService;
+  private static final long COOKIE_MAX_AGE_SECONDS = 24 * 60 * 60;
 
   @PostMapping("/otp")
   public ResponseEntity<Void> requestOtp(@Valid @RequestBody final OtpRequest request) {
@@ -41,7 +42,7 @@ public class AuthController {
             .httpOnly(true)
             .secure(isCookieSecure) // Set to true in production with HTTPS
             .path("/")
-            .maxAge(24 * 60 * 60) // 1 day
+            .maxAge(COOKIE_MAX_AGE_SECONDS) // 1 day
             .sameSite("Strict")
             .build();
 
