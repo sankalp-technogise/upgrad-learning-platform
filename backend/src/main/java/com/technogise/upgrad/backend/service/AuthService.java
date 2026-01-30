@@ -45,14 +45,15 @@ public class AuthService {
     final String otp = new DecimalFormat("000000").format(RANDOM.nextInt(1_000_000));
     final String otpHash = hashOtp(otp);
 
-    final OtpVerification verification = OtpVerification.builder()
-        .email(email)
-        .otpHash(otpHash)
-        .createdAt(LocalDateTime.now())
-        .expiresAt(LocalDateTime.now().plusMinutes(5))
-        .attempts(0)
-        .verified(false)
-        .build();
+    final OtpVerification verification =
+        OtpVerification.builder()
+            .email(email)
+            .otpHash(otpHash)
+            .createdAt(LocalDateTime.now())
+            .expiresAt(LocalDateTime.now().plusMinutes(5))
+            .attempts(0)
+            .verified(false)
+            .build();
     otpRepository.save(verification);
     emailService.sendOtp(email, otp);
   }
@@ -60,9 +61,10 @@ public class AuthService {
   @Transactional
   @SuppressWarnings("null")
   public AuthResponse login(final String email, final String otp) {
-    final OtpVerification verification = otpRepository
-        .findFirstByEmailOrderByCreatedAtDesc(email)
-        .orElseThrow(() -> new AuthenticationException("Invalid OTP or Email"));
+    final OtpVerification verification =
+        otpRepository
+            .findFirstByEmailOrderByCreatedAtDesc(email)
+            .orElseThrow(() -> new AuthenticationException("Invalid OTP or Email"));
 
     if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
       throw new AuthenticationException("OTP Expired");
@@ -89,9 +91,10 @@ public class AuthService {
     verification.setVerified(true);
     otpRepository.save(verification);
 
-    final User user = userRepository
-        .findByEmail(email)
-        .orElseGet(() -> userRepository.save(User.builder().email(email).build()));
+    final User user =
+        userRepository
+            .findByEmail(email)
+            .orElseGet(() -> userRepository.save(User.builder().email(email).build()));
 
     final String token = jwtService.generateToken(user.getId(), user.getEmail());
 

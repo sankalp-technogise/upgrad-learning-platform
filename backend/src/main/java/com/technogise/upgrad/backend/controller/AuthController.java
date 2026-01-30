@@ -28,9 +28,9 @@ public class AuthController {
     return ResponseEntity.ok().build();
   }
 
-  @
+  @Value("${app.security.cookie.secure}")
+  private boolean isCookieSecure;
 
-  
   @Value("${app.security.cookie.same-site:Strict}")
   private String cookieSameSite;
 
