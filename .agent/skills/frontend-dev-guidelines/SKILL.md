@@ -327,6 +327,27 @@ if (isLoading) {
 
 ---
 
+## Refactoring & Code Quality Rules
+
+### Anti-Patterns to Avoid
+
+- **Magic Strings**: Do not use hardcoded strings for configuration, routes, or keys.
+- **Inline Styling**: Avoid defining complex style objects inline (e.g., inside `sx={{ ... }}`).
+
+### Rules
+
+#### 1. Styling
+
+- **Extract `sx` properties**: Move complex styles to named constants.
+  - ❌ Bad: `<Box sx={{ mt: 4, color: 'blue' }}>`
+  - ✅ Good: `<Box sx={containerStyles}>` where `const containerStyles = { mt: 4, color: 'blue' }`
+
+#### 2. Constants
+
+- **Named Constants**: Use named constants for Session/Local storage keys and Route paths.
+
+---
+
 ## Quick Reference: File Structure
 
 ```

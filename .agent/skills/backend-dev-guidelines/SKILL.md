@@ -277,6 +277,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 ---
 
+## Refactoring & Code Quality Rules
+
+### Anti-Patterns to Avoid
+
+- **Magic Strings**: Do not use hardcoded strings for configuration, routes, or keys.
+
+### Rules
+
+1. **Configuration**: Extract URLs and environment-specific variables to application properties file.
+   - ❌ Bad: `@Value("http://localhost:3000")`
+   - ✅ Good: `@Value("${app.frontend.url}")`
+2. **Constants**: Use `static final` constants for fixed lists of paths or internal identifiers.
+
+---
+
 ## ADRs (Architecture Decisions)
 
 Use ADRs for:

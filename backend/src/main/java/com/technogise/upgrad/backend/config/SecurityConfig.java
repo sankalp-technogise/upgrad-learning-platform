@@ -23,7 +23,9 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  @Value("${app.frontend.url:http://localhost:5173}")
+  private static final String[] PUBLIC_URLS = {"/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**"};
+
+  @Value("${app.frontend.url}")
   private String frontendUrl;
 
   @Bean
@@ -33,17 +35,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers(
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
-                            "/api/auth/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
-                            "/v3/api-docs/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
-                            "/swagger-ui/**"))
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
+            auth -> auth.requestMatchers(PUBLIC_URLS).permitAll().anyRequest().authenticated())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
