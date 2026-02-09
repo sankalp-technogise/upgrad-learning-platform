@@ -2,13 +2,12 @@ package com.technogise.upgrad.backend.controller;
 
 import com.technogise.upgrad.backend.dto.InterestDTO;
 import com.technogise.upgrad.backend.dto.SaveInterestsRequest;
+import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.exception.AuthenticationException;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import com.technogise.upgrad.backend.service.InterestService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,15 +36,12 @@ public class InterestController {
     // Extract user email from authenticated principal (populated by
     // JwtAuthenticationFilter)
     final String email = (String) authentication.getPrincipal();
-    final UUID userId =
-        Objects.requireNonNull(
-            userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new AuthenticationException("User not found"))
-                .getId(),
-            "User ID cannot be null");
+    final User user =
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new AuthenticationException("User not found"));
 
-    interestService.saveUserInterests(userId, request.interestNames());
+    interestService.saveUserInterests(user, request.interestNames());
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 }

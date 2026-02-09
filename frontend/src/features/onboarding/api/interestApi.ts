@@ -8,7 +8,7 @@ export interface Interest {
 }
 
 export interface SaveInterestsRequest {
-  interestIds: string[]
+  interestNames: string[]
 }
 
 export const interestApi = {
@@ -17,9 +17,9 @@ export const interestApi = {
     return data
   },
 
-  saveUserInterests: async (interestIds: string[]): Promise<void> => {
+  saveUserInterests: async (interestNames: string[]): Promise<void> => {
     await apiClient.post<void>('/user/interests', {
-      interestIds,
+      interestNames,
     } as SaveInterestsRequest)
   },
 }

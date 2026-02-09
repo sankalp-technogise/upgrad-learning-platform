@@ -4,11 +4,9 @@ import com.technogise.upgrad.backend.constants.Interest;
 import com.technogise.upgrad.backend.dto.InterestDTO;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.entity.UserInterest;
-import com.technogise.upgrad.backend.exception.AuthenticationException;
 import com.technogise.upgrad.backend.repository.UserInterestRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -41,14 +39,13 @@ public class InterestService {
   /**
    * Saves user's selected interests.
    *
-   * @param userId the user ID
+   * @param user the authenticated user entity
    * @param interestNames list of interest names to save
    * @throws IllegalArgumentException if interest names are empty or invalid
-   * @throws AuthenticationException if user is not found
    */
   @Transactional
   public void saveUserInterests(
-      @NonNull final UUID userId, @NonNull final List<String> interestNames) {
+      @NonNull final User user, @NonNull final List<String> interestNames) {
     if (interestNames == null || interestNames.isEmpty()) {
       throw new IllegalArgumentException("At least one interest must be selected");
     }
@@ -62,14 +59,8 @@ public class InterestService {
           "Invalid interest names: " + String.join(", ", invalidNames));
     }
 
-    // Validate user exists
-    final User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new AuthenticationException("User not found"));
-
     // Delete existing user interests (idempotent operation)
-    userInterestRepository.deleteByUserId(userId);
+    userInterestRepository.deleteByUserId(user.getId());
 
     // Create new user-interest relationships
     final List<UserInterest> userInterests =
@@ -83,14 +74,7 @@ public class InterestService {
 
     // Mark onboarding as completed
     if (!user.getOnboardingCompleted()) {
-      final User updatedUser =
-          User.builder()
-              .id(user.getId())
-              .email(user.getEmail())
-              .onboardingCompleted(true)
-              .createdAt(user.getCreatedAt())
-              .build();
-      userRepository.save(updatedUser);
+      userRepository.markOnboardingCompleted(user.getId());
     }
   }
 }

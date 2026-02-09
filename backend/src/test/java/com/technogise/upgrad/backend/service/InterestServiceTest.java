@@ -7,13 +7,10 @@ import static org.mockito.Mockito.*;
 import com.technogise.upgrad.backend.constants.Interest;
 import com.technogise.upgrad.backend.dto.InterestDTO;
 import com.technogise.upgrad.backend.entity.User;
-import com.technogise.upgrad.backend.exception.AuthenticationException;
 import com.technogise.upgrad.backend.repository.UserInterestRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,56 +72,29 @@ class InterestServiceTest {
   void shouldSaveUserInterestsSuccessfully() {
     // Given
     List<String> interestNames = List.of("PYTHON_PROGRAMMING", "DATA_SCIENCE");
-    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
     // When
-    interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
+    interestService.saveUserInterests(testUser, interestNames);
 
     // Then
-    verify(userRepository).findById(userId);
     verify(userInterestRepository).deleteByUserId(userId);
     verify(userInterestRepository).saveAll(any());
-    verify(userRepository).save(any(User.class));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenUserNotFound() {
-    // Given
-    List<String> interestNames = List.of("PYTHON_PROGRAMMING");
-    when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-    // When / Then
-    AuthenticationException exception =
-        assertThrows(
-            AuthenticationException.class,
-            () ->
-                interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
-
-    assertEquals("User not found", exception.getMessage());
-    verify(userRepository).findById(userId);
-    verify(userInterestRepository, never()).saveAll(any());
+    verify(userRepository).markOnboardingCompleted(userId);
   }
 
   @Test
   void shouldThrowExceptionWhenInterestNamesAreInvalid() {
     // Given
     List<String> interestNames = List.of("PYTHON_PROGRAMMING", "INVALID_INTEREST");
-    // Note: No userRepository stubbing needed - validation happens before user
-    // lookup
 
     // When / Then
     IllegalArgumentException exception =
         assertThrows(
             IllegalArgumentException.class,
-            () ->
-                interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
+            () -> interestService.saveUserInterests(testUser, interestNames));
 
     assertTrue(exception.getMessage().contains("Invalid interest names"));
     assertTrue(exception.getMessage().contains("INVALID_INTEREST"));
-    verify(userRepository, never()).findById(any());
     verify(userInterestRepository, never()).saveAll(any());
   }
 
@@ -137,12 +107,9 @@ class InterestServiceTest {
     IllegalArgumentException exception =
         assertThrows(
             IllegalArgumentException.class,
-            () ->
-                interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
+            () -> interestService.saveUserInterests(testUser, interestNames));
 
     assertEquals("At least one interest must be selected", exception.getMessage());
-    verify(userRepository, never()).findById(any());
     verify(userInterestRepository, never()).saveAll(any());
   }
 
@@ -150,20 +117,12 @@ class InterestServiceTest {
   void shouldMarkOnboardingAsCompletedForNewUser() {
     // Given
     List<String> interestNames = List.of("PYTHON_PROGRAMMING");
-    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
     // When
-    interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
+    interestService.saveUserInterests(testUser, interestNames);
 
     // Then
-    verify(userRepository)
-        .save(
-            argThat(
-                user ->
-                    user.getId().equals(userId)
-                        && user.getEmail().equals("test@example.com")
-                        && user.getOnboardingCompleted()));
+    verify(userRepository).markOnboardingCompleted(userId);
   }
 
   @Test
@@ -178,27 +137,24 @@ class InterestServiceTest {
             .build();
 
     List<String> interestNames = List.of("DATA_SCIENCE");
-    when(userRepository.findById(userId)).thenReturn(Optional.of(completedUser));
 
     // When
-    interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
+    interestService.saveUserInterests(completedUser, interestNames);
 
     // Then
     verify(userInterestRepository).saveAll(any());
-    // User save should not be called since onboarding is already completed
-    verify(userRepository, times(0)).save(any(User.class));
+    // markOnboardingCompleted should not be called since onboarding is already
+    // completed
+    verify(userRepository, never()).markOnboardingCompleted(any());
   }
 
   @Test
   void shouldDeletePreviousInterestsBeforeSavingNew() {
     // Given
     List<String> interestNames = List.of("CLOUD_COMPUTING");
-    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
     // When
-    interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
+    interestService.saveUserInterests(testUser, interestNames);
 
     // Then
     verify(userInterestRepository).deleteByUserId(userId);
