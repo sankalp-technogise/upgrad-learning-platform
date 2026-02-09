@@ -4,11 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.technogise.upgrad.backend.constants.Interest;
 import com.technogise.upgrad.backend.dto.InterestDTO;
-import com.technogise.upgrad.backend.entity.Interest;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.exception.AuthenticationException;
-import com.technogise.upgrad.backend.repository.InterestRepository;
 import com.technogise.upgrad.backend.repository.UserInterestRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -26,42 +25,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InterestServiceTest {
 
-  @Mock private InterestRepository interestRepository;
-
   @Mock private UserInterestRepository userInterestRepository;
 
   @Mock private UserRepository userRepository;
 
   @InjectMocks private InterestService interestService;
 
-  private Interest interest1;
-  private Interest interest2;
   private User testUser;
   private UUID userId;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
-
-    interest1 =
-        Interest.builder()
-            .id(UUID.randomUUID())
-            .name("Java")
-            .description("Java programming")
-            .iconName("java-icon")
-            .displayOrder(1)
-            .createdAt(LocalDateTime.now())
-            .build();
-
-    interest2 =
-        Interest.builder()
-            .id(UUID.randomUUID())
-            .name("Python")
-            .description("Python programming")
-            .iconName("python-icon")
-            .displayOrder(2)
-            .createdAt(LocalDateTime.now())
-            .build();
 
     testUser =
         User.builder()
@@ -73,51 +48,42 @@ class InterestServiceTest {
   }
 
   @Test
-  void shouldGetAllInterestsOrderedByDisplayOrder() {
-    // Given
-    when(interestRepository.findAllByOrderByDisplayOrderAsc())
-        .thenReturn(List.of(interest1, interest2));
-
+  void shouldGetAllInterestsFromEnum() {
     // When
     List<InterestDTO> result = interestService.getAllInterests();
 
     // Then
-    assertEquals(2, result.size());
-    assertEquals("Java", result.get(0).name());
-    assertEquals("Python", result.get(1).name());
-    assertEquals(interest1.getId(), result.get(0).id());
-    assertEquals(interest2.getId(), result.get(1).id());
-    verify(interestRepository).findAllByOrderByDisplayOrderAsc();
+    assertEquals(Interest.values().length, result.size());
+    // Verify no repository call is made
+    verifyNoInteractions(userInterestRepository);
   }
 
   @Test
-  void shouldReturnEmptyListWhenNoInterestsExist() {
-    // Given
-    when(interestRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of());
-
+  void shouldReturnCorrectInterestDetails() {
     // When
     List<InterestDTO> result = interestService.getAllInterests();
 
     // Then
-    assertTrue(result.isEmpty());
-    verify(interestRepository).findAllByOrderByDisplayOrderAsc();
+    InterestDTO pythonInterest =
+        result.stream().filter(i -> i.id().equals("PYTHON_PROGRAMMING")).findFirst().orElseThrow();
+
+    assertEquals("Python Programming", pythonInterest.name());
+    assertEquals("puzzle", pythonInterest.iconName());
   }
 
   @Test
   void shouldSaveUserInterestsSuccessfully() {
     // Given
-    List<UUID> interestIds = List.of(interest1.getId(), interest2.getId());
+    List<String> interestNames = List.of("PYTHON_PROGRAMMING", "DATA_SCIENCE");
     when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1, interest2));
 
     // When
     interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
 
     // Then
     verify(userRepository).findById(userId);
-    verify(interestRepository).findAllById(interestIds);
-    verify(userInterestRepository).deleteByIdUserId(userId);
+    verify(userInterestRepository).deleteByUserId(userId);
     verify(userInterestRepository).saveAll(any());
     verify(userRepository).save(any(User.class));
   }
@@ -125,7 +91,7 @@ class InterestServiceTest {
   @Test
   void shouldThrowExceptionWhenUserNotFound() {
     // Given
-    List<UUID> interestIds = List.of(interest1.getId());
+    List<String> interestNames = List.of("PYTHON_PROGRAMMING");
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // When / Then
@@ -134,21 +100,19 @@ class InterestServiceTest {
             AuthenticationException.class,
             () ->
                 interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
 
     assertEquals("User not found", exception.getMessage());
     verify(userRepository).findById(userId);
-    verify(interestRepository, never()).findAllById(any());
+    verify(userInterestRepository, never()).saveAll(any());
   }
 
   @Test
-  void shouldThrowExceptionWhenInterestIdsAreInvalid() {
+  void shouldThrowExceptionWhenInterestNamesAreInvalid() {
     // Given
-    UUID invalidId = UUID.randomUUID();
-    List<UUID> interestIds = List.of(interest1.getId(), invalidId);
-    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1)); // Only 1
-    // found
+    List<String> interestNames = List.of("PYTHON_PROGRAMMING", "INVALID_INTEREST");
+    // Note: No userRepository stubbing needed - validation happens before user
+    // lookup
 
     // When / Then
     IllegalArgumentException exception =
@@ -156,18 +120,18 @@ class InterestServiceTest {
             IllegalArgumentException.class,
             () ->
                 interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
 
-    assertEquals("One or more interest IDs are invalid", exception.getMessage());
-    verify(userRepository).findById(userId);
-    verify(interestRepository).findAllById(interestIds);
+    assertTrue(exception.getMessage().contains("Invalid interest names"));
+    assertTrue(exception.getMessage().contains("INVALID_INTEREST"));
+    verify(userRepository, never()).findById(any());
     verify(userInterestRepository, never()).saveAll(any());
   }
 
   @Test
   void shouldThrowExceptionWhenInterestListIsEmpty() {
     // Given
-    List<UUID> interestIds = List.of();
+    List<String> interestNames = List.of();
 
     // When / Then
     IllegalArgumentException exception =
@@ -175,24 +139,22 @@ class InterestServiceTest {
             IllegalArgumentException.class,
             () ->
                 interestService.saveUserInterests(
-                    Objects.requireNonNull(userId), Objects.requireNonNull(interestIds)));
+                    Objects.requireNonNull(userId), Objects.requireNonNull(interestNames)));
 
     assertEquals("At least one interest must be selected", exception.getMessage());
     verify(userRepository, never()).findById(any());
-    verify(interestRepository, never()).findAllById(any());
     verify(userInterestRepository, never()).saveAll(any());
   }
 
   @Test
   void shouldMarkOnboardingAsCompletedForNewUser() {
     // Given
-    List<UUID> interestIds = List.of(interest1.getId());
+    List<String> interestNames = List.of("PYTHON_PROGRAMMING");
     when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
     interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
 
     // Then
     verify(userRepository)
@@ -215,13 +177,12 @@ class InterestServiceTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    List<UUID> interestIds = List.of(interest1.getId());
+    List<String> interestNames = List.of("DATA_SCIENCE");
     when(userRepository.findById(userId)).thenReturn(Optional.of(completedUser));
-    when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
     interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
 
     // Then
     verify(userInterestRepository).saveAll(any());
@@ -232,31 +193,30 @@ class InterestServiceTest {
   @Test
   void shouldDeletePreviousInterestsBeforeSavingNew() {
     // Given
-    List<UUID> interestIds = List.of(interest1.getId());
+    List<String> interestNames = List.of("CLOUD_COMPUTING");
     when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(interestRepository.findAllById(interestIds)).thenReturn(List.of(interest1));
 
     // When
     interestService.saveUserInterests(
-        Objects.requireNonNull(userId), Objects.requireNonNull(interestIds));
+        Objects.requireNonNull(userId), Objects.requireNonNull(interestNames));
 
     // Then
-    verify(userInterestRepository).deleteByIdUserId(userId);
+    verify(userInterestRepository).deleteByUserId(userId);
   }
 
   @Test
-  void shouldMapInterestToDTO() {
+  void shouldValidateAllEnumValuesAreValid() {
+    // Given - all enum values should be valid
+    for (Interest interest : Interest.values()) {
+      assertTrue(Interest.isValid(interest.name()));
+    }
+  }
+
+  @Test
+  void shouldRejectInvalidInterestName() {
     // Given
-    when(interestRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of(interest1));
-
-    // When
-    List<InterestDTO> result = interestService.getAllInterests();
-
-    // Then
-    InterestDTO dto = result.get(0);
-    assertEquals(interest1.getId(), dto.id());
-    assertEquals(interest1.getName(), dto.name());
-    assertEquals(interest1.getDescription(), dto.description());
-    assertEquals(interest1.getIconName(), dto.iconName());
+    assertFalse(Interest.isValid("NONEXISTENT"));
+    assertFalse(Interest.isValid(null));
+    assertFalse(Interest.isValid(""));
   }
 }

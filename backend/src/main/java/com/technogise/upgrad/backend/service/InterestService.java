@@ -1,12 +1,10 @@
 package com.technogise.upgrad.backend.service;
 
+import com.technogise.upgrad.backend.constants.Interest;
 import com.technogise.upgrad.backend.dto.InterestDTO;
-import com.technogise.upgrad.backend.entity.Interest;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.entity.UserInterest;
-import com.technogise.upgrad.backend.entity.UserInterestId;
 import com.technogise.upgrad.backend.exception.AuthenticationException;
-import com.technogise.upgrad.backend.repository.InterestRepository;
 import com.technogise.upgrad.backend.repository.UserInterestRepository;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import java.util.List;
@@ -19,27 +17,49 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class InterestService {
-  private final InterestRepository interestRepository;
   private final UserInterestRepository userInterestRepository;
   private final UserRepository userRepository;
 
+  /**
+   * Returns all available interests from the enum.
+   *
+   * @return list of available interests as DTOs
+   */
   @Transactional(readOnly = true)
   public List<InterestDTO> getAllInterests() {
-    return interestRepository.findAllByOrderByDisplayOrderAsc().stream()
+    return Interest.getAll().stream()
         .map(
             interest ->
                 new InterestDTO(
-                    interest.getId(),
-                    interest.getName(),
+                    interest.name(),
+                    interest.getDisplayName(),
                     interest.getDescription(),
                     interest.getIconName()))
         .toList();
   }
 
+  /**
+   * Saves user's selected interests.
+   *
+   * @param userId the user ID
+   * @param interestNames list of interest names to save
+   * @throws IllegalArgumentException if interest names are empty or invalid
+   * @throws AuthenticationException if user is not found
+   */
   @Transactional
-  public void saveUserInterests(@NonNull final UUID userId, @NonNull final List<UUID> interestIds) {
-    if (interestIds == null || interestIds.isEmpty()) {
+  public void saveUserInterests(
+      @NonNull final UUID userId, @NonNull final List<String> interestNames) {
+    if (interestNames == null || interestNames.isEmpty()) {
       throw new IllegalArgumentException("At least one interest must be selected");
+    }
+
+    // Validate all interest names
+    final List<String> invalidNames =
+        interestNames.stream().filter(name -> !Interest.isValid(name)).toList();
+
+    if (!invalidNames.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Invalid interest names: " + String.join(", ", invalidNames));
     }
 
     // Validate user exists
@@ -48,25 +68,15 @@ public class InterestService {
             .findById(userId)
             .orElseThrow(() -> new AuthenticationException("User not found"));
 
-    // Validate interest IDs exist
-    final List<Interest> interests = interestRepository.findAllById(interestIds);
-    if (interests.size() != interestIds.size()) {
-      throw new IllegalArgumentException("One or more interest IDs are invalid");
-    }
-
     // Delete existing user interests (idempotent operation)
-    userInterestRepository.deleteByIdUserId(userId);
+    userInterestRepository.deleteByUserId(userId);
 
     // Create new user-interest relationships
     final List<UserInterest> userInterests =
-        interests.stream()
+        interestNames.stream()
             .map(
-                interest ->
-                    UserInterest.builder()
-                        .id(new UserInterestId(userId, interest.getId()))
-                        .user(user)
-                        .interest(interest)
-                        .build())
+                interestName ->
+                    UserInterest.builder().user(user).interestName(interestName).build())
             .toList();
 
     userInterestRepository.saveAll(userInterests);

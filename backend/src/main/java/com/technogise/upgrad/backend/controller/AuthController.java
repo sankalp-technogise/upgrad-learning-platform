@@ -35,7 +35,6 @@ public class AuthController {
   private String cookieSameSite;
 
   @PostMapping("/login")
-  @SuppressWarnings("null")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody final LoginRequest request) {
     final AuthResponse response = authService.login(request.email(), request.otp());
 

@@ -45,7 +45,7 @@ public class InterestController {
                 .getId(),
             "User ID cannot be null");
 
-    interestService.saveUserInterests(userId, request.interestIds());
+    interestService.saveUserInterests(userId, request.interestNames());
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 }
