@@ -83,7 +83,7 @@ class AuthControllerTest {
     final LoginRequest request = new LoginRequest("test@example.com", "123456");
     final UUID userId = UUID.randomUUID();
     final AuthResponse authResponse =
-        new AuthResponse("jwt-token", new UserDto(userId, "test@example.com", false));
+        new AuthResponse("jwt-token", UserDto.forTest(userId, "test@example.com"));
 
     when(authService.login(anyString(), anyString())).thenReturn(authResponse);
 
@@ -131,7 +131,7 @@ class AuthControllerTest {
   void shouldReturnCurrentUser() throws Exception {
     UUID userId = UUID.randomUUID();
     String email = "test@example.com";
-    UserDto userDto = new UserDto(userId, email, false);
+    UserDto userDto = UserDto.forTest(userId, email);
 
     when(authService.getUser(email)).thenReturn(userDto);
 
