@@ -34,7 +34,6 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldAuthenticateValidToken() throws Exception {
     String token = "valid.token";
     String email = "test@example.com";
@@ -52,7 +51,6 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldContinueChainWhenNoCookie() throws Exception {
     when(request.getCookies()).thenReturn(null);
 
@@ -65,7 +63,6 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldContinueChainWhenNoTokenCookie() throws Exception {
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("other", "cookie");
     when(request.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {cookie});
@@ -79,7 +76,6 @@ class JwtAuthenticationFilterTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldHandleInvalidToken() throws Exception {
     String token = "invalid.token";
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);

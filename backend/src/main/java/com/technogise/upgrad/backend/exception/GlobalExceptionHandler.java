@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<String> handleIllegalArgumentException(final IllegalArgumentException ex) {
+    logger.warn("Invalid argument: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  }
+
   @ExceptionHandler(RateLimitExceededException.class)
   public ResponseEntity<String> handleRateLimitException(final RateLimitExceededException ex) {
     logger.warn("Rate limit exceeded: {}", ex.getMessage());

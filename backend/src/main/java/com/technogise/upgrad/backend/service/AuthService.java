@@ -26,7 +26,6 @@ public class AuthService {
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   @Transactional
-  @SuppressWarnings("null")
   public void generateOtp(final String email) {
     // Check rate limit
     checkRateLimit(email);
@@ -58,7 +57,6 @@ public class AuthService {
   }
 
   @Transactional
-  @SuppressWarnings("null")
   public AuthResponse login(final String email, final String otp) {
     final OtpVerification verification =
         otpRepository
@@ -97,14 +95,15 @@ public class AuthService {
 
     final String token = jwtService.generateToken(user.getId(), user.getEmail());
 
-    return new AuthResponse(token, new UserDto(user.getId(), user.getEmail()));
+    return new AuthResponse(
+        token, new UserDto(user.getId(), user.getEmail(), user.getOnboardingCompleted()));
   }
 
   @Transactional(readOnly = true)
   public UserDto getUser(final String email) {
     return userRepository
         .findByEmail(email)
-        .map(user -> new UserDto(user.getId(), user.getEmail()))
+        .map(user -> new UserDto(user.getId(), user.getEmail(), user.getOnboardingCompleted()))
         .orElseThrow(() -> new AuthenticationException("User not found"));
   }
 

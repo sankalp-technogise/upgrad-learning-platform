@@ -58,6 +58,7 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core:11.2.0'
 	implementation 'org.flywaydb:flyway-database-postgresql:11.2.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:junit-jupiter'

@@ -52,7 +52,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldRequestOtpSuccessfully() throws Exception {
 
     final OtpRequest request = new OtpRequest("test@example.com");
@@ -68,7 +67,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenRequestOtpWithInvalidEmail() throws Exception {
     final OtpRequest request = new OtpRequest("invalid");
 
@@ -81,12 +79,11 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldLoginSuccessfully() throws Exception {
     final LoginRequest request = new LoginRequest("test@example.com", "123456");
     final UUID userId = UUID.randomUUID();
     final AuthResponse authResponse =
-        new AuthResponse("jwt-token", new UserDto(userId, "test@example.com"));
+        new AuthResponse("jwt-token", UserDto.forTest(userId, "test@example.com"));
 
     when(authService.login(anyString(), anyString())).thenReturn(authResponse);
 
@@ -106,7 +103,6 @@ class AuthControllerTest {
   }
 
   @Test
-  @SuppressWarnings("null") // MediaType.APPLICATION_JSON, ObjectMapper.writeValueAsString
   void shouldReturnBadRequestWhenLoginWithInvalidEmail() throws Exception {
     final LoginRequest request = new LoginRequest("invalid", "123456");
 
@@ -135,7 +131,7 @@ class AuthControllerTest {
   void shouldReturnCurrentUser() throws Exception {
     UUID userId = UUID.randomUUID();
     String email = "test@example.com";
-    UserDto userDto = new UserDto(userId, email);
+    UserDto userDto = UserDto.forTest(userId, email);
 
     when(authService.getUser(email)).thenReturn(userDto);
 

@@ -42,7 +42,6 @@ class AuthServiceTest {
   @InjectMocks private AuthService authService;
 
   @Test
-  @SuppressWarnings("null")
   void shouldGenerateOtpAndSendEmail() {
     final String email = "test@example.com";
 
@@ -59,7 +58,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldInvalidatePreviousOtpWhenGeneratingNew() {
     final String email = "test@example.com";
 
@@ -95,7 +93,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldThrowRateLimitExceptionWhenMaxAttemptsExceeded() {
     final String email = "test@example.com";
     final LocalDateTime now = LocalDateTime.now();
@@ -123,7 +120,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldAllowOtpGenerationAfterCooldownPeriod() {
     final String email = "test@example.com";
     final LocalDateTime now = LocalDateTime.now();
@@ -149,7 +145,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldLoginSuccessfullyWithValidOtp() {
     final String email = "test@example.com";
     final String otp = "123456";
@@ -183,7 +178,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldCreateUserIfNotExistsOnLogin() {
     final String email = "newuser@example.com";
     final String otp = "654321";
@@ -217,7 +211,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldThrowExceptionForInvalidOtp() {
     final String email = "test@example.com";
     final String otp = "wrong-otp";
@@ -292,7 +285,6 @@ class AuthServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null")
   void shouldIncrementAttemptsAndThrowExceptionOnFailure() {
     final String email = "test@example.com";
     final String otp = "wrong-otp";

@@ -25,7 +25,6 @@ class SmtpEmailServiceTest {
   }
 
   @Test
-  @SuppressWarnings("null") // SimpleMailMessage argument
   void shouldSendOtpEmail() {
     final String to = "user@example.com";
     final String otp = "123456";

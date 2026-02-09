@@ -29,11 +29,19 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    // Spring Security 6.x requires explicit CSRF token handling
+    org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler requestHandler =
+        new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler();
+    // Setting the CSRF request attribute name to null allows Angular/React apps to
+    // work with CSRF
+    requestHandler.setCsrfRequestAttributeName(null);
+
     http.csrf(
             csrf ->
                 csrf.csrfTokenRepository(
                         org.springframework.security.web.csrf.CookieCsrfTokenRepository
                             .withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(requestHandler)
                     .ignoringRequestMatchers(PUBLIC_URLS))
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .sessionManagement(
