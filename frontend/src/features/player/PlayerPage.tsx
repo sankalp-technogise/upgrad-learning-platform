@@ -13,6 +13,7 @@ export const PlayerPage = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
+        setError(null)
         setLoading(true)
         const data = await contentApi.getContent(contentId)
         setContent(data)

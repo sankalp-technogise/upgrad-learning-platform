@@ -3,16 +3,16 @@ import { apiClient } from '@/lib/apiClient'
 export interface ContentItem {
   id: string
   title: string
-  description: string
-  thumbnailUrl: string
+  description: string | null
+  thumbnailUrl: string | null
   category: string
 }
 
 export interface ContinueWatchingItem {
   contentId: string
   title: string
-  description: string
-  thumbnailUrl: string
+  description: string | null
+  thumbnailUrl: string | null
   progressPercent: number
 }
 

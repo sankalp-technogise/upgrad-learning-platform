@@ -12,14 +12,19 @@ describe('VideoPlayer', () => {
   }
 
   beforeEach(() => {
-    // Mock HTMLMediaElement properties and methods
+    // Mock HTMLMediaElement methods — play() must return a Promise
     Object.defineProperty(window.HTMLMediaElement.prototype, 'play', {
       writable: true,
-      value: vi.fn(),
+      value: vi.fn().mockImplementation(function (this: HTMLMediaElement) {
+        Object.defineProperty(this, 'paused', { value: false, writable: true, configurable: true })
+        return Promise.resolve()
+      }),
     })
     Object.defineProperty(window.HTMLMediaElement.prototype, 'pause', {
       writable: true,
-      value: vi.fn(),
+      value: vi.fn().mockImplementation(function (this: HTMLMediaElement) {
+        Object.defineProperty(this, 'paused', { value: true, writable: true, configurable: true })
+      }),
     })
   })
 
@@ -29,16 +34,19 @@ describe('VideoPlayer', () => {
     expect(screen.getByRole('slider', { name: /seek/i })).toBeInTheDocument()
   })
 
-  it('toggles play/pause on click', () => {
+  it('toggles play/pause on click', async () => {
     render(<VideoPlayer {...defaultProps} />)
     const video = screen.getByTestId('video-element')
 
-    // Simulate click on video
+    // Video starts paused in JSDOM, click should call play()
     fireEvent.click(video)
     expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled()
 
-    fireEvent.click(video)
-    expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
+    // After play() mock sets paused=false, next click should call pause()
+    await vi.waitFor(() => {
+      fireEvent.click(video)
+      expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
+    })
   })
 
   // Add more tests for volume, fullscreen, etc.

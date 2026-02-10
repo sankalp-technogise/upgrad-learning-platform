@@ -69,8 +69,8 @@ export const HomePage = () => {
               <IconButton aria-label="notifications" sx={styles.notificationIcon}>
                 <NotificationsIcon />
               </IconButton>
-              <IconButton sx={styles.avatarButton}>
-                <Avatar alt={user?.email} src="" sx={{ width: 36, height: 36 }} />
+              <IconButton sx={styles.avatarButton} aria-label="User profile">
+                <Avatar alt={user?.email} sx={{ width: 36, height: 36 }} />
               </IconButton>
             </Box>
           </Box>

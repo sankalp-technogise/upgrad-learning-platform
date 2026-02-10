@@ -13,8 +13,8 @@ interface VideoPlayerProps {
   src: string
   poster?: string
   title: string
-  episodeNumber?: number
-  duration?: number
+  episodeNumber?: number | null
+  duration?: number | null
   muted?: boolean
 }
 
@@ -43,16 +43,19 @@ export const VideoPlayer = ({
   const [showControls, setShowControls] = useState(true)
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handlePlayPause = useCallback(() => {
+  const handlePlayPause = useCallback(async () => {
     if (videoRef.current) {
-      if (playing) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
+      try {
+        if (videoRef.current.paused) {
+          await videoRef.current.play()
+        } else {
+          videoRef.current.pause()
+        }
+      } catch (error) {
+        console.error('Playback failed:', error)
       }
-      setPlaying(!playing)
     }
-  }, [playing])
+  }, [])
 
   const handleTimeUpdate = useCallback(() => {
     if (videoRef.current) {
@@ -77,6 +80,7 @@ export const VideoPlayer = ({
     if (videoRef.current && typeof value === 'number') {
       const newVolume = value
       videoRef.current.volume = newVolume
+      videoRef.current.muted = newVolume === 0
       setVolume(newVolume)
       setMuted(newVolume === 0)
     }
@@ -100,11 +104,9 @@ export const VideoPlayer = ({
     if (!containerRef.current) return
 
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen()
-      setIsFullscreen(true)
+      containerRef.current.requestFullscreen().catch((err) => console.error(err))
     } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
+      document.exitFullscreen().catch((err) => console.error(err))
     }
   }, [])
 
@@ -127,22 +129,12 @@ export const VideoPlayer = ({
     const video = videoRef.current
     if (!video) return
 
-    video.addEventListener('timeupdate', handleTimeUpdate)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('play', onPlay)
-    video.addEventListener('pause', onPause)
-
-    // Cleanup
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('play', onPlay)
-      video.removeEventListener('pause', onPause)
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current)
-      }
-    }
-  }, [handleTimeUpdate, handleLoadedMetadata, onPlay, onPause])
+    // Initial state sync
+    setPlaying(!video.paused)
+    setDuration(video.duration || 0)
+    setMuted(video.muted)
+    setVolume(video.volume)
+  }, [])
 
   // Handle fullscreen change events from browser
   useEffect(() => {
@@ -180,6 +172,10 @@ export const VideoPlayer = ({
         muted={muted}
         playsInline
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onPlay={onPlay}
+        onPause={onPause}
         onClick={handlePlayPause}
       />
 
@@ -193,11 +189,13 @@ export const VideoPlayer = ({
           background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
           p: 2,
           opacity: showControls ? 1 : 0,
+          pointerEvents: showControls ? 'auto' : 'none',
           transition: 'opacity 0.3s',
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
         }}
+        aria-hidden={!showControls}
         onClick={(e) => e.stopPropagation()} // Prevent playing when clicking controls
       >
         {/* Progress Bar */}
@@ -235,12 +233,20 @@ export const VideoPlayer = ({
         {/* Controls Row */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <IconButton onClick={handlePlayPause} sx={{ color: 'white' }}>
+            <IconButton
+              onClick={handlePlayPause}
+              sx={{ color: 'white' }}
+              aria-label={playing ? 'Pause' : 'Play'}
+            >
               {playing ? <Pause /> : <PlayArrow />}
             </IconButton>
 
             <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 150 }}>
-              <IconButton onClick={toggleMute} sx={{ color: 'white' }}>
+              <IconButton
+                onClick={toggleMute}
+                sx={{ color: 'white' }}
+                aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+              >
                 {muted || volume === 0 ? <VolumeOff /> : <VolumeUp />}
               </IconButton>
               <Slider
@@ -267,7 +273,11 @@ export const VideoPlayer = ({
                 {title}
               </Typography>
             )}
-            <IconButton onClick={toggleFullscreen} sx={{ color: 'white' }}>
+            <IconButton
+              onClick={toggleFullscreen}
+              sx={{ color: 'white' }}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
               {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
             </IconButton>
           </Stack>

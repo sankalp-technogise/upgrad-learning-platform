@@ -84,7 +84,12 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
           params={{ contentId: item.contentId }}
           style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
         >
-          <CardMedia component="img" sx={styles.media} image={item.thumbnailUrl} alt={item.title} />
+          <CardMedia
+            component="img"
+            sx={styles.media}
+            image={item.thumbnailUrl ?? undefined}
+            alt={item.title}
+          />
           <CardContent sx={styles.content}>
             <Typography variant="h6" sx={styles.title}>
               {item.title}

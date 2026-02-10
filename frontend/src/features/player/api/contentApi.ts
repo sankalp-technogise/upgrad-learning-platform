@@ -7,8 +7,8 @@ export interface ContentDetail {
   thumbnailUrl: string
   videoUrl: string
   category: string
-  episodeNumber: number
-  durationSeconds: number
+  episodeNumber: number | null
+  durationSeconds: number | null
   createdAt: string
 }
 

@@ -20,7 +20,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@ToString(exclude = "email")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

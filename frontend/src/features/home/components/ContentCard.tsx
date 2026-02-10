@@ -59,7 +59,7 @@ export function ContentCard({ content }: ContentCardProps) {
         <CardMedia
           component="img"
           sx={styles.media}
-          image={content.thumbnailUrl}
+          image={content.thumbnailUrl ?? undefined}
           alt={content.title}
         />
         <CardContent sx={styles.content}>

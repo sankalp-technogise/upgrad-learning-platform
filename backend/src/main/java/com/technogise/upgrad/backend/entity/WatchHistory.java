@@ -26,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@ToString(exclude = "user")
 public class WatchHistory {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
