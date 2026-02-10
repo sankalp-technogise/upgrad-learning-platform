@@ -21,7 +21,7 @@ public class HomepageController {
 
   @GetMapping("/homepage")
   public ResponseEntity<HomepageSectionsDto> getHomepage(Authentication authentication) {
-    final String email = (String) authentication.getPrincipal();
+    final String email = authentication.getName();
     final User user =
         userRepository
             .findByEmail(email)

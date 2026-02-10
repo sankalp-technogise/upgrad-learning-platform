@@ -83,6 +83,9 @@ export const HomePage = () => {
           {/* Interest-based Recommendations */}
           {sections?.recommended && sections.recommended.length > 0 && (
             <Box sx={styles.sectionBox} id="recommended-section">
+              <Typography variant="h5" sx={styles.sectionTitle}>
+                Recommended for you
+              </Typography>
               <Box sx={styles.grid}>
                 {sections.recommended.map((content) => (
                   <ContentCard key={content.id} content={content} />

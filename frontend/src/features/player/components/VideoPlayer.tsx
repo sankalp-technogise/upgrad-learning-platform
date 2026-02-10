@@ -15,12 +15,13 @@ interface VideoPlayerProps {
   title: string
   episodeNumber?: number
   duration?: number
+  muted?: boolean
 }
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60)
   const seconds = Math.floor(time % 60)
-  return `${minutes}:${seconds.toString().padStart(2, '0')} `
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
 export const VideoPlayer = ({
@@ -29,6 +30,7 @@ export const VideoPlayer = ({
   title,
   episodeNumber,
   duration: initialDuration,
+  muted: initialMuted,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -36,7 +38,7 @@ export const VideoPlayer = ({
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(initialDuration || 0)
   const [volume, setVolume] = useState(1)
-  const [muted, setMuted] = useState(false)
+  const [muted, setMuted] = useState(initialMuted || false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -118,26 +120,29 @@ export const VideoPlayer = ({
     }, 3000)
   }, [playing])
 
+  const onPlay = useCallback(() => setPlaying(true), [])
+  const onPause = useCallback(() => setPlaying(false), [])
+
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('play', () => setPlaying(true))
-    video.addEventListener('pause', () => setPlaying(false))
+    video.addEventListener('play', onPlay)
+    video.addEventListener('pause', onPause)
 
     // Cleanup
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('play', () => setPlaying(true))
-      video.removeEventListener('pause', () => setPlaying(false))
+      video.removeEventListener('play', onPlay)
+      video.removeEventListener('pause', onPause)
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current)
       }
     }
-  }, [handleTimeUpdate, handleLoadedMetadata])
+  }, [handleTimeUpdate, handleLoadedMetadata, onPlay, onPause])
 
   // Handle fullscreen change events from browser
   useEffect(() => {
@@ -170,6 +175,10 @@ export const VideoPlayer = ({
         ref={videoRef}
         src={src}
         poster={poster}
+        className="w-full h-full object-contain"
+        autoPlay
+        muted={muted}
+        playsInline
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         onClick={handlePlayPause}
       />

@@ -12,6 +12,7 @@ import com.technogise.upgrad.backend.repository.WatchHistoryRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HomepageService {
 
   private static final int COMPLETE_PROGRESS = 100;
+  private static final int RECOMMENDED_PAGE_SIZE = 5;
 
   private final ContentRepository contentRepository;
   private final WatchHistoryRepository watchHistoryRepository;
@@ -54,14 +56,24 @@ public class HomepageService {
     if (userCategories.isEmpty()) {
       return List.of();
     }
-    return contentRepository.findByCategoryIn(userCategories).stream().map(this::toDto).toList();
+    return contentRepository
+        .findByCategoryIn(userCategories, PageRequest.of(0, RECOMMENDED_PAGE_SIZE))
+        .stream()
+        .map(this::toDto)
+        .toList();
   }
 
   private List<ContentDto> buildExploration(final List<String> userCategories) {
     if (userCategories.isEmpty()) {
-      return contentRepository.findAll().stream().map(this::toDto).toList();
+      return contentRepository.findAll(PageRequest.of(0, RECOMMENDED_PAGE_SIZE)).stream()
+          .map(this::toDto)
+          .toList();
     }
-    return contentRepository.findByCategoryNotIn(userCategories).stream().map(this::toDto).toList();
+    return contentRepository
+        .findByCategoryNotIn(userCategories, PageRequest.of(0, RECOMMENDED_PAGE_SIZE))
+        .stream()
+        .map(this::toDto)
+        .toList();
   }
 
   private ContinueWatchingDto toDto(final WatchHistory watchHistory) {

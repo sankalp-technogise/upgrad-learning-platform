@@ -34,13 +34,11 @@ describe('VideoPlayer', () => {
     const video = screen.getByTestId('video-element')
 
     // Simulate click on video
-    if (video) {
-      fireEvent.click(video)
-      expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled()
+    fireEvent.click(video)
+    expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled()
 
-      fireEvent.click(video)
-      expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
-    }
+    fireEvent.click(video)
+    expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
   })
 
   // Add more tests for volume, fullscreen, etc.

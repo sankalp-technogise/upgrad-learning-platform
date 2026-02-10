@@ -70,6 +70,7 @@ export const PlayerPage = () => {
         title={content.title}
         episodeNumber={content.episodeNumber}
         duration={content.durationSeconds}
+        muted
       />
     </Box>
   )

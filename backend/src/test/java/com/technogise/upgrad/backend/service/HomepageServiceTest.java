@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class HomepageServiceTest {
@@ -83,6 +84,8 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.of(watchHistory));
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of());
+    when(contentRepository.findAll(any(Pageable.class)))
+        .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
 
@@ -97,6 +100,8 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.empty());
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of());
+    when(contentRepository.findAll(any(Pageable.class)))
+        .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
 
@@ -116,9 +121,10 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.empty());
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of(interest));
-    when(contentRepository.findByCategoryIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryIn(eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(pythonContent));
-    when(contentRepository.findByCategoryNotIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryNotIn(
+            eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(designContent));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
@@ -140,9 +146,10 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.empty());
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of(interest));
-    when(contentRepository.findByCategoryIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryIn(eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(pythonContent));
-    when(contentRepository.findByCategoryNotIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryNotIn(
+            eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(designContent));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
@@ -157,7 +164,9 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.empty());
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of());
-    when(contentRepository.findAll()).thenReturn(List.of(pythonContent, designContent));
+    when(contentRepository.findAll(any(Pageable.class)))
+        .thenReturn(
+            new org.springframework.data.domain.PageImpl<>(List.of(pythonContent, designContent)));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
 
@@ -178,9 +187,10 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.empty());
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of(interest));
-    when(contentRepository.findByCategoryIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryIn(eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(pythonContent));
-    when(contentRepository.findByCategoryNotIn(List.of("PYTHON_PROGRAMMING")))
+    when(contentRepository.findByCategoryNotIn(
+            eq(List.of("PYTHON_PROGRAMMING")), any(Pageable.class)))
         .thenReturn(List.of(designContent));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
@@ -211,6 +221,8 @@ class HomepageServiceTest {
             userId, 100))
         .thenReturn(Optional.of(watchHistory));
     when(userInterestRepository.findByUserId(userId)).thenReturn(List.of());
+    when(contentRepository.findAll(any(Pageable.class)))
+        .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
 
     HomepageSectionsDto result = homepageService.getHomepageSections(userId);
 

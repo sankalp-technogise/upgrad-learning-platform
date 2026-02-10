@@ -12,7 +12,7 @@ INSERT INTO contents (title, description, thumbnail_url, video_url, category) VA
     ('Personal Finance 101', 'Master budgeting, investing, and retirement planning for long-term financial health.', 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=200&fit=crop', 'https://example.com/videos/personal-finance', 'PERSONAL_FINANCE'),
     ('Python for Data Engineering', 'Use Python to build robust ETL pipelines and data infrastructure.', 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=200&fit=crop', 'https://example.com/videos/python-data-eng', 'PYTHON_PROGRAMMING'),
     ('Machine Learning with Python', 'Hands-on guide to building ML models using scikit-learn and TensorFlow.', 'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=400&h=200&fit=crop', 'https://example.com/videos/ml-python', 'DATA_SCIENCE')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (title) DO NOTHING;
 
 -- Update existing rows that still have placeholder thumbnails
 UPDATE contents SET thumbnail_url = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop' WHERE title = 'Introduction to Data Science' AND thumbnail_url LIKE '%placehold%';

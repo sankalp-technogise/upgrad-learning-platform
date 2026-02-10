@@ -1,5 +1,6 @@
 import { Box, Card, CardMedia, CardContent, Typography, LinearProgress } from '@mui/material'
 import type { ContinueWatchingItem } from '../api/homepageApi'
+import { Link } from '@tanstack/react-router'
 
 interface ContinueWatchingSectionProps {
   item: ContinueWatchingItem
@@ -70,9 +71,6 @@ const styles = {
     whiteSpace: 'nowrap',
   },
 } as const
-
-import { Link } from '@tanstack/react-router'
-// ... imports
 
 export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) {
   return (

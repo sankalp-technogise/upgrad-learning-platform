@@ -145,6 +145,22 @@ const otpRoute = createRoute({
 const playerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/watch/$contentId',
+  beforeLoad: async () => {
+    try {
+      await authApi.getMe()
+    } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
+      if (
+        (error as { response?: { status?: number } }).response?.status === 401 ||
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
+        throw redirect({ to: '/login' })
+      }
+      throw error
+    }
+  },
   component: PlayerPage,
 })
 

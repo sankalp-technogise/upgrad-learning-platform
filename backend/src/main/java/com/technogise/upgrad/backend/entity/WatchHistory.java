@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(
@@ -39,9 +40,11 @@ public class WatchHistory {
 
   @Column(name = "progress_percent", nullable = false)
   @Builder.Default
+  @Setter
   private Integer progressPercent = 0;
 
   @Column(name = "last_watched_at", nullable = false)
   @Builder.Default
+  @Setter
   private LocalDateTime lastWatchedAt = LocalDateTime.now();
 }
