@@ -31,7 +31,7 @@ vi.mock('@tanstack/react-router', () => ({
 
 describe('HomePage', () => {
   const mockData = {
-    continueWatching: null,
+    continueWatching: undefined,
     recommended: [],
     exploration: [
       {
