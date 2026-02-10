@@ -36,6 +36,8 @@ public class ContentController {
         content.getThumbnailUrl(),
         content.getVideoUrl(),
         content.getCategory(),
+        content.getEpisodeNumber(),
+        content.getDurationSeconds(),
         content.getCreatedAt());
   }
 }

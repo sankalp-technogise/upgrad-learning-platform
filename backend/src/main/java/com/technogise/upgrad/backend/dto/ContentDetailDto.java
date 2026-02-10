@@ -10,4 +10,6 @@ public record ContentDetailDto(
     String thumbnailUrl,
     String videoUrl,
     String category,
+    Integer episodeNumber,
+    Integer durationSeconds,
     LocalDateTime createdAt) {}

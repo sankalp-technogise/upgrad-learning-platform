@@ -38,6 +38,12 @@ public class Content {
   @Column(nullable = false, length = 100)
   private String category;
 
+  @Column(name = "episode_number")
+  private Integer episodeNumber;
+
+  @Column(name = "duration_seconds")
+  private Integer durationSeconds;
+
   @Column(nullable = false, updatable = false)
   @Builder.Default
   private LocalDateTime createdAt = LocalDateTime.now();

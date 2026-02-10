@@ -2,7 +2,7 @@
 -- Run via: make seed-db
 
 INSERT INTO contents (title, description, thumbnail_url, video_url, category) VALUES
-    ('Introduction to Data Science', 'Learn the fundamentals of data analysis, visualization, and machine learning in this comprehensive series.', 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop', 'https://example.com/videos/data-science-intro', 'DATA_SCIENCE'),
+    ('Introduction to Data Science', 'Learn the fundamentals of data analysis, visualization, and machine learning in this comprehensive series.', 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 'DATA_SCIENCE'),
     ('Advanced Python Concepts', 'Explore decorators, generators, and asynchronous programming to elevate your Python skills.', 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400&h=200&fit=crop', 'https://example.com/videos/advanced-python', 'PYTHON_PROGRAMMING'),
     ('UI/UX Design Principles', 'Master the core principles of user-centric design, from wireframing to high-fidelity prototyping.', 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=200&fit=crop', 'https://example.com/videos/uiux-principles', 'UI_UX_DESIGN'),
     ('Cloud Computing Fundamentals', 'Build and deploy scalable applications using major cloud platforms like AWS and GCP.', 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=200&fit=crop', 'https://example.com/videos/cloud-fundamentals', 'CLOUD_COMPUTING'),
