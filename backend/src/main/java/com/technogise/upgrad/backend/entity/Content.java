@@ -12,13 +12,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
-@Table(name = "contents")
+@Table(
+    name = "contents",
+    uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = "title"))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Content {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

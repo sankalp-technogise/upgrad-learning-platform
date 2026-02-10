@@ -138,16 +138,15 @@ const otpRoute = createRoute({
   errorComponent: () => <Navigate to="/login" />,
 })
 
-// ... (existing imports)
-
-// ... (existing imports)
-
 const playerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/watch/$contentId',
   beforeLoad: async () => {
     try {
-      await authApi.getMe()
+      const user = await authApi.getMe()
+      if (!user.onboardingCompleted) {
+        throw redirect({ to: '/onboarding/interests' })
+      }
     } catch (error: unknown) {
       if (isRedirect(error)) {
         throw error

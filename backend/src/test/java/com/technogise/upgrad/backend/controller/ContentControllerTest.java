@@ -7,15 +7,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.technogise.upgrad.backend.config.SecurityConfig;
-import com.technogise.upgrad.backend.entity.Content;
+import com.technogise.upgrad.backend.dto.ContentDetailDto;
 import com.technogise.upgrad.backend.exception.GlobalExceptionHandler;
-import com.technogise.upgrad.backend.repository.ContentRepository;
+import com.technogise.upgrad.backend.exception.ResourceNotFoundException;
 import com.technogise.upgrad.backend.security.JwtAuthenticationFilter;
+import com.technogise.upgrad.backend.service.ContentService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class ContentControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private ContentRepository contentRepository;
+  @MockitoBean private ContentService contentService;
 
   @MockitoBean private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -53,20 +53,19 @@ class ContentControllerTest {
   @org.springframework.security.test.context.support.WithMockUser
   void shouldReturnContent_WhenExists() throws Exception {
     UUID contentId = UUID.randomUUID();
-    Content content =
-        Content.builder()
-            .id(contentId)
-            .title("Test Content")
-            .description("Test Description")
-            .thumbnailUrl("http://example.com/thumb.jpg")
-            .videoUrl("http://example.com/video.mp4")
-            .category("Test Category")
-            .episodeNumber(1)
-            .durationSeconds(120)
-            .createdAt(LocalDateTime.now())
-            .build();
+    ContentDetailDto contentDto =
+        new ContentDetailDto(
+            contentId,
+            "Test Content",
+            "Test Description",
+            "http://example.com/thumb.jpg",
+            "http://example.com/video.mp4",
+            "Test Category",
+            1,
+            120,
+            LocalDateTime.now());
 
-    when(contentRepository.findById(contentId)).thenReturn(Optional.of(content));
+    when(contentService.getContent(contentId)).thenReturn(contentDto);
 
     mockMvc
         .perform(get("/api/contents/{id}", contentId))
@@ -85,7 +84,8 @@ class ContentControllerTest {
   @org.springframework.security.test.context.support.WithMockUser
   void shouldReturn404_WhenContentNotFound() throws Exception {
     UUID contentId = UUID.randomUUID();
-    when(contentRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+    when(contentService.getContent(contentId))
+        .thenThrow(new ResourceNotFoundException("Content not found"));
 
     mockMvc.perform(get("/api/contents/{id}", contentId)).andExpect(status().isNotFound());
   }
