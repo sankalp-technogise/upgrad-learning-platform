@@ -15,6 +15,7 @@ import { LandingPage } from '@/features/landing/LandingPage'
 import { HomePage } from '@/features/home/HomePage'
 import { InterestSelectionPage } from '@/features/onboarding/components/InterestSelectionPage'
 import { authApi } from '@/features/auth/api/authApi'
+import { PlayerPage } from '@/features/player/PlayerPage'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -137,12 +138,23 @@ const otpRoute = createRoute({
   errorComponent: () => <Navigate to="/login" />,
 })
 
+// ... (existing imports)
+
+// ... (existing imports)
+
+const playerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/watch/$contentId',
+  component: PlayerPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   homeRoute,
   onboardingRoute,
   loginRoute,
   otpRoute,
+  playerRoute,
 ])
 
 export const router = createRouter({ routeTree })
