@@ -15,6 +15,7 @@ import { LandingPage } from '@/features/landing/LandingPage'
 import { HomePage } from '@/features/home/HomePage'
 import { InterestSelectionPage } from '@/features/onboarding/components/InterestSelectionPage'
 import { authApi } from '@/features/auth/api/authApi'
+import { PlayerPage } from '@/features/player/PlayerPage'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -137,12 +138,38 @@ const otpRoute = createRoute({
   errorComponent: () => <Navigate to="/login" />,
 })
 
+const playerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/watch/$contentId',
+  beforeLoad: async () => {
+    try {
+      const user = await authApi.getMe()
+      if (!user.onboardingCompleted) {
+        throw redirect({ to: '/onboarding/interests' })
+      }
+    } catch (error: unknown) {
+      if (isRedirect(error)) {
+        throw error
+      }
+      if (
+        (error as { response?: { status?: number } }).response?.status === 401 ||
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
+        throw redirect({ to: '/login' })
+      }
+      throw error
+    }
+  },
+  component: PlayerPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   homeRoute,
   onboardingRoute,
   loginRoute,
   otpRoute,
+  playerRoute,
 ])
 
 export const router = createRouter({ routeTree })

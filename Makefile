@@ -1,4 +1,4 @@
-.PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down format format-backend format-frontend
+.PHONY: all build test clean run-backend run-frontend build-backend build-frontend test-backend test-frontend docker-up docker-down format format-backend format-frontend seed-db
 
 # Load environment variables from .env file if it exists
 ifneq (,$(wildcard .env))
@@ -58,6 +58,12 @@ docker-up:
 
 docker-down:
 	docker-compose down
+
+# --- Database Seed (local dev only) ---
+seed-db:
+	@echo "Seeding database with sample content..."
+	PGPASSWORD=$${DB_PASS:-password} psql -h $${DB_HOST:-localhost} -p $${DB_PORT:-5433} -U $${DB_USER:-user} -d $${DB_NAME:-upgrad_platform} -f backend/src/main/resources/db/seed/seed_content.sql
+	@echo "Seed complete."
 
 clean:
 	@echo "Cleaning up..."

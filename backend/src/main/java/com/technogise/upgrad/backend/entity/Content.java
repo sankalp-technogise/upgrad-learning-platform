@@ -15,23 +15,38 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@Table(name = "users")
+@Table(
+    name = "contents",
+    uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = "title"))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "email")
-public class User {
+@ToString
+public class Content {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(nullable = false, unique = true)
-  private String email;
+  @Column(nullable = false)
+  private String title;
 
-  @Column(name = "onboarding_completed", nullable = false)
-  @Builder.Default
-  private Boolean onboardingCompleted = false;
+  private String description;
+
+  @Column(name = "thumbnail_url")
+  private String thumbnailUrl;
+
+  @Column(name = "video_url")
+  private String videoUrl;
+
+  @Column(nullable = false, length = 100)
+  private String category;
+
+  @Column(name = "episode_number")
+  private Integer episodeNumber;
+
+  @Column(name = "duration_seconds")
+  private Integer durationSeconds;
 
   @Column(nullable = false, updatable = false)
   @Builder.Default
