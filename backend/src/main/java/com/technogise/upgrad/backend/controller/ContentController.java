@@ -21,4 +21,12 @@ public class ContentController {
   public ResponseEntity<ContentDetailDto> getContent(@PathVariable UUID id) {
     return ResponseEntity.ok(contentService.getContent(id));
   }
+
+  @GetMapping("/{id}/next")
+  public ResponseEntity<ContentDetailDto> getNextEpisode(@PathVariable UUID id) {
+    return contentService
+        .getNextEpisode(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.noContent().build());
+  }
 }

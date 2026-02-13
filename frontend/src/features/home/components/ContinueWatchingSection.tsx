@@ -94,6 +94,15 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
             <Typography variant="h6" sx={styles.title}>
               {item.title}
             </Typography>
+            {(item.category || item.episodeNumber) && (
+              <Typography
+                variant="body2"
+                sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 0.5 }}
+              >
+                {item.category?.replace(/_/g, ' ')}
+                {item.episodeNumber ? ` · Episode ${item.episodeNumber}` : ''}
+              </Typography>
+            )}
             <Typography variant="body2" sx={styles.description}>
               {item.description}
             </Typography>

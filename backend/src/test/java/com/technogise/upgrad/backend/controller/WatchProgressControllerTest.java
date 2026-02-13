@@ -1,27 +1,29 @@
 package com.technogise.upgrad.backend.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.technogise.upgrad.backend.config.SecurityConfig;
-import com.technogise.upgrad.backend.dto.ContentDto;
-import com.technogise.upgrad.backend.dto.ContinueWatchingDto;
-import com.technogise.upgrad.backend.dto.HomepageSectionsDto;
+import com.technogise.upgrad.backend.dto.WatchProgressRequest;
+import com.technogise.upgrad.backend.dto.WatchProgressResponse;
 import com.technogise.upgrad.backend.entity.User;
 import com.technogise.upgrad.backend.exception.GlobalExceptionHandler;
 import com.technogise.upgrad.backend.repository.UserRepository;
 import com.technogise.upgrad.backend.security.JwtAuthenticationFilter;
-import com.technogise.upgrad.backend.service.HomepageService;
+import com.technogise.upgrad.backend.service.WatchProgressService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,19 +32,21 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(HomepageController.class)
+@WebMvcTest(WatchProgressController.class)
 @Import({GlobalExceptionHandler.class, SecurityConfig.class})
-class HomepageControllerTest {
+class WatchProgressControllerTest {
 
   @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
 
-  @MockitoBean private HomepageService homepageService;
+  @MockitoBean private WatchProgressService watchProgressService;
   @MockitoBean private UserRepository userRepository;
   @MockitoBean private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -60,7 +64,6 @@ class HomepageControllerTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    // Default filter behavior: pass through without authentication
     Mockito.doAnswer(
             invocation -> {
               FilterChain chain = invocation.getArgument(2);
@@ -87,58 +90,65 @@ class HomepageControllerTest {
   }
 
   @Test
-  void shouldReturnHomepageSections() throws Exception {
+  void shouldSaveProgressForAuthenticatedUser() throws Exception {
     setupAuthenticatedUser();
-
     UUID contentId = UUID.randomUUID();
-    HomepageSectionsDto sections =
-        new HomepageSectionsDto(
-            new ContinueWatchingDto(
-                contentId, "Python Intro", "Desc", "thumb.jpg", 50, "PYTHON_PROGRAMMING", 1, 120),
-            List.of(
-                new ContentDto(
-                    contentId, "Python Intro", "Desc", "thumb.jpg", "PYTHON_PROGRAMMING")),
-            List.of(
-                new ContentDto(UUID.randomUUID(), "Design", "Desc", "thumb2.jpg", "UI_UX_DESIGN")));
+    WatchProgressRequest request = new WatchProgressRequest(contentId, 50, 300);
 
     when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
-    when(homepageService.getHomepageSections(TEST_USER_ID)).thenReturn(sections);
 
     mockMvc
-        .perform(get("/api/homepage").with(csrf()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.continueWatching.contentId").value(contentId.toString()))
-        .andExpect(jsonPath("$.continueWatching.progressPercent").value(50))
-        .andExpect(jsonPath("$.recommended").isArray())
-        .andExpect(jsonPath("$.recommended[0].title").value("Python Intro"))
-        .andExpect(jsonPath("$.exploration").isArray())
-        .andExpect(jsonPath("$.exploration[0].title").value("Design"));
+        .perform(
+            put("/api/watch-progress")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk());
+
+    verify(watchProgressService).saveProgress(eq(TEST_USER_ID), any(WatchProgressRequest.class));
   }
 
   @Test
-  void shouldRejectUnauthenticatedRequest() throws Exception {
-    mockMvc.perform(get("/api/homepage").with(csrf())).andExpect(status().isForbidden());
+  void shouldRejectUnauthenticatedSaveProgress() throws Exception {
+    UUID contentId = UUID.randomUUID();
+    WatchProgressRequest request = new WatchProgressRequest(contentId, 50, 300);
+
+    mockMvc
+        .perform(
+            put("/api/watch-progress")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
   }
 
   @Test
-  void shouldReturnHomepageWithoutContinueWatching() throws Exception {
+  void shouldReturnProgressForContent() throws Exception {
     setupAuthenticatedUser();
-
-    HomepageSectionsDto sections =
-        new HomepageSectionsDto(
-            null,
-            List.of(
-                new ContentDto(
-                    UUID.randomUUID(), "Python", "Desc", "thumb.jpg", "PYTHON_PROGRAMMING")),
-            List.of());
+    UUID contentId = UUID.randomUUID();
 
     when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
-    when(homepageService.getHomepageSections(TEST_USER_ID)).thenReturn(sections);
+    when(watchProgressService.getProgress(TEST_USER_ID, contentId))
+        .thenReturn(Optional.of(new WatchProgressResponse(contentId, 60, 360)));
 
     mockMvc
-        .perform(get("/api/homepage").with(csrf()))
+        .perform(get("/api/watch-progress/" + contentId).with(csrf()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.continueWatching").doesNotExist())
-        .andExpect(jsonPath("$.recommended[0].title").value("Python"));
+        .andExpect(jsonPath("$.contentId").value(contentId.toString()))
+        .andExpect(jsonPath("$.progressPercent").value(60))
+        .andExpect(jsonPath("$.lastWatchedPosition").value(360));
+  }
+
+  @Test
+  void shouldReturn204WhenNoProgressExists() throws Exception {
+    setupAuthenticatedUser();
+    UUID contentId = UUID.randomUUID();
+
+    when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+    when(watchProgressService.getProgress(TEST_USER_ID, contentId)).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(get("/api/watch-progress/" + contentId).with(csrf()))
+        .andExpect(status().isNoContent());
   }
 }

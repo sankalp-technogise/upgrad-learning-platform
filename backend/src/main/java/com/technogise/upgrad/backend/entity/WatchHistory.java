@@ -45,6 +45,11 @@ public class WatchHistory {
   @Setter
   private Integer progressPercent = 0;
 
+  @Column(name = "last_watched_position", nullable = false)
+  @Builder.Default
+  @Setter
+  private Integer lastWatchedPosition = 0;
+
   @Column(name = "last_watched_at", nullable = false)
   @Builder.Default
   @Setter

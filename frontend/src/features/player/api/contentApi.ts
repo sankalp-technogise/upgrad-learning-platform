@@ -17,4 +17,12 @@ export const contentApi = {
     const { data } = await apiClient.get<ContentDetail>(`/contents/${id}`)
     return data
   },
+
+  getNextEpisode: async (id: string): Promise<ContentDetail | null> => {
+    const { data, status } = await apiClient.get<ContentDetail>(`/contents/${id}/next`, {
+      validateStatus: (s) => s === 200 || s === 204,
+    })
+    if (status === 204) return null
+    return data
+  },
 }
