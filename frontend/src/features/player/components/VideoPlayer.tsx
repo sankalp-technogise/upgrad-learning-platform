@@ -9,6 +9,12 @@ import {
   FullscreenExit,
 } from '@mui/icons-material'
 
+export interface ProgressUpdateEvent {
+  currentTime: number
+  duration: number
+  progressPercent: number
+}
+
 interface VideoPlayerProps {
   src: string
   poster?: string
@@ -16,6 +22,8 @@ interface VideoPlayerProps {
   episodeNumber?: number | null
   duration?: number | null
   muted?: boolean
+  initialTime?: number
+  onProgressUpdate?: (event: ProgressUpdateEvent) => void
 }
 
 const formatTime = (time: number) => {
@@ -31,6 +39,8 @@ export const VideoPlayer = ({
   episodeNumber,
   duration: initialDuration,
   muted: initialMuted,
+  initialTime,
+  onProgressUpdate,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -59,15 +69,39 @@ export const VideoPlayer = ({
 
   const handleTimeUpdate = useCallback(() => {
     if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime)
+      const time = videoRef.current.currentTime
+      const dur = videoRef.current.duration || 0
+      setCurrentTime(time)
+      if (onProgressUpdate && dur > 0) {
+        onProgressUpdate({
+          currentTime: time,
+          duration: dur,
+          progressPercent: Math.min(Math.round((time / dur) * 100), 100),
+        })
+      }
     }
-  }, [])
+  }, [onProgressUpdate])
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration)
+      if (initialTime && initialTime > 0) {
+        videoRef.current.currentTime = initialTime
+        setCurrentTime(initialTime)
+      }
     }
-  }, [])
+  }, [initialTime])
+
+  useEffect(() => {
+    if (
+      videoRef.current &&
+      initialTime !== undefined &&
+      initialTime > 0 &&
+      videoRef.current.readyState >= 1
+    ) {
+      videoRef.current.currentTime = initialTime
+    }
+  }, [initialTime])
 
   const handleSeek = (_: Event, value: number | number[]) => {
     if (videoRef.current && typeof value === 'number') {

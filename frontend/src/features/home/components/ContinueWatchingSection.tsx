@@ -82,6 +82,7 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
         <Link
           to="/watch/$contentId"
           params={{ contentId: item.contentId }}
+          search={{ resume: true }}
           style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
         >
           <CardMedia
@@ -94,6 +95,22 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
             <Typography variant="h6" sx={styles.title}>
               {item.title}
             </Typography>
+            {(item.category || item.episodeNumber) && (
+              <Typography
+                variant="body2"
+                sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 0.5 }}
+              >
+                {[
+                  item.category
+                    ?.replace(/_/g, ' ')
+                    .toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()),
+                  item.episodeNumber ? `Episode ${item.episodeNumber}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Typography>
+            )}
             <Typography variant="body2" sx={styles.description}>
               {item.description}
             </Typography>

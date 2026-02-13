@@ -77,6 +77,7 @@ class HomepageServiceTest {
             .user(testUser)
             .content(pythonContent)
             .progressPercent(45)
+            .lastWatchedPosition(270)
             .lastWatchedAt(LocalDateTime.now())
             .build();
 
@@ -214,6 +215,7 @@ class HomepageServiceTest {
             .user(testUser)
             .content(pythonContent)
             .progressPercent(72)
+            .lastWatchedPosition(432)
             .lastWatchedAt(LocalDateTime.now())
             .build();
 
@@ -233,5 +235,8 @@ class HomepageServiceTest {
     assertEquals("Python course", cw.description());
     assertEquals("https://example.com/python.jpg", cw.thumbnailUrl());
     assertEquals(72, cw.progressPercent());
+    assertEquals("PYTHON_PROGRAMMING", cw.category());
+    assertNull(cw.episodeNumber());
+    assertEquals(432, cw.lastWatchedPosition());
   }
 }

@@ -14,6 +14,9 @@ export interface ContinueWatchingItem {
   description: string | null
   thumbnailUrl: string | null
   progressPercent: number
+  category: string
+  episodeNumber: number | null
+  lastWatchedPosition: number
 }
 
 export interface HomepageSections {

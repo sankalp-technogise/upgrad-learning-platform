@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface WatchHistoryRepository extends JpaRepository<WatchHistory, UUID> {
   Optional<WatchHistory> findTopByUserIdAndProgressPercentLessThanOrderByLastWatchedAtDesc(
       UUID userId, int maxProgress);
+
+  Optional<WatchHistory> findByUserIdAndContentId(UUID userId, UUID contentId);
 }

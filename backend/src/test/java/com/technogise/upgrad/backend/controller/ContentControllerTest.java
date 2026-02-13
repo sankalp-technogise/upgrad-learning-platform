@@ -16,6 +16,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,5 +89,53 @@ class ContentControllerTest {
         .thenThrow(new ResourceNotFoundException("Content not found"));
 
     mockMvc.perform(get("/api/contents/{id}", contentId)).andExpect(status().isNotFound());
+  }
+
+  @Test
+  @org.springframework.security.test.context.support.WithMockUser
+  void shouldReturnNextEpisode_WhenExists() throws Exception {
+    UUID contentId = UUID.randomUUID();
+    UUID nextId = UUID.randomUUID();
+    ContentDetailDto nextDto =
+        new ContentDetailDto(
+            nextId,
+            "Next Episode",
+            "Next Description",
+            "http://example.com/thumb2.jpg",
+            "http://example.com/video2.mp4",
+            "Test Category",
+            2,
+            150,
+            LocalDateTime.now());
+
+    when(contentService.getNextEpisode(contentId)).thenReturn(Optional.of(nextDto));
+
+    mockMvc
+        .perform(get("/api/contents/{id}/next", contentId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(nextId.toString()))
+        .andExpect(jsonPath("$.title").value("Next Episode"))
+        .andExpect(jsonPath("$.episodeNumber").value(2));
+  }
+
+  @Test
+  @org.springframework.security.test.context.support.WithMockUser
+  void shouldReturn204_WhenNoNextEpisode() throws Exception {
+    UUID contentId = UUID.randomUUID();
+
+    when(contentService.getNextEpisode(contentId)).thenReturn(Optional.empty());
+
+    mockMvc.perform(get("/api/contents/{id}/next", contentId)).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @org.springframework.security.test.context.support.WithMockUser
+  void shouldReturn404_WhenContentNotFoundForNextEpisode() throws Exception {
+    UUID contentId = UUID.randomUUID();
+
+    when(contentService.getNextEpisode(contentId))
+        .thenThrow(new ResourceNotFoundException("Content not found"));
+
+    mockMvc.perform(get("/api/contents/{id}/next", contentId)).andExpect(status().isNotFound());
   }
 }

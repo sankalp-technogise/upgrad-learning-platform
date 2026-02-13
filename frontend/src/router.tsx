@@ -138,9 +138,14 @@ const otpRoute = createRoute({
   errorComponent: () => <Navigate to="/login" />,
 })
 
+const playerSearchSchema = z.object({
+  resume: z.boolean().optional(),
+})
+
 const playerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/watch/$contentId',
+  validateSearch: (search) => playerSearchSchema.parse(search),
   beforeLoad: async () => {
     try {
       const user = await authApi.getMe()

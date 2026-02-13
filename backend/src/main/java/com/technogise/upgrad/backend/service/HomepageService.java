@@ -83,7 +83,10 @@ public class HomepageService {
         content.getTitle(),
         content.getDescription(),
         content.getThumbnailUrl(),
-        watchHistory.getProgressPercent());
+        watchHistory.getProgressPercent(),
+        content.getCategory(),
+        content.getEpisodeNumber(),
+        watchHistory.getLastWatchedPosition());
   }
 
   private ContentDto toDto(final Content content) {
