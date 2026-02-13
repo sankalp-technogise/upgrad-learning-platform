@@ -99,8 +99,15 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
                 variant="body2"
                 sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 0.5 }}
               >
-                {item.category?.replace(/_/g, ' ')}
-                {item.episodeNumber ? ` · Episode ${item.episodeNumber}` : ''}
+                {[
+                  item.category
+                    ?.replace(/_/g, ' ')
+                    .toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()),
+                  item.episodeNumber ? `Episode ${item.episodeNumber}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
               </Typography>
             )}
             <Typography variant="body2" sx={styles.description}>

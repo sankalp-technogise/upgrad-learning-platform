@@ -6,6 +6,17 @@ import { watchProgressApi } from './api/watchProgressApi'
 import { VideoPlayer, type ProgressUpdateEvent } from './components/VideoPlayer'
 
 const SAVE_INTERVAL_MS = 5000
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+
+const getCsrfToken = (): string | null => {
+  if (typeof document === 'undefined') return null
+  const cookies = document.cookie.split('; ')
+  const xsrfCookie = cookies.find((c) => c.startsWith('XSRF-TOKEN='))
+  if (!xsrfCookie) return null
+  const eqIndex = xsrfCookie.indexOf('=')
+  if (eqIndex === -1) return null
+  return decodeURIComponent(xsrfCookie.slice(eqIndex + 1))
+}
 
 export const PlayerPage = () => {
   const { contentId } = useParams({ from: '/watch/$contentId' })
@@ -87,13 +98,21 @@ export const PlayerPage = () => {
     const handleBeforeUnload = () => {
       if (latestProgressRef.current && contentId) {
         const event = latestProgressRef.current
-        const payload = JSON.stringify({
-          contentId,
-          progressPercent: event.progressPercent,
-          lastWatchedPosition: Math.floor(event.currentTime),
+        const csrfToken = getCsrfToken()
+        fetch(`${API_BASE_URL}/watch-progress`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
+          },
+          body: JSON.stringify({
+            contentId,
+            progressPercent: event.progressPercent,
+            lastWatchedPosition: Math.floor(event.currentTime),
+          }),
+          keepalive: true,
+          credentials: 'include',
         })
-        const blob = new Blob([payload], { type: 'application/json' })
-        navigator.sendBeacon('/api/watch-progress', blob)
       }
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -101,9 +120,11 @@ export const PlayerPage = () => {
   }, [contentId])
 
   useEffect(() => {
+    const capturedContentId = contentId
+    const capturedSaveProgress = saveProgress
     return () => {
-      if (latestProgressRef.current && contentId) {
-        saveProgress(latestProgressRef.current)
+      if (latestProgressRef.current && capturedContentId) {
+        capturedSaveProgress(latestProgressRef.current)
       }
     }
   }, [contentId, saveProgress])

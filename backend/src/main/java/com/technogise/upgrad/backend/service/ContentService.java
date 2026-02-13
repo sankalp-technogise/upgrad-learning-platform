@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class ContentService {
 
   private final ContentRepository contentRepository;
 
+  @Transactional(readOnly = true)
   public ContentDetailDto getContent(UUID id) {
     return contentRepository
         .findById(id)
@@ -22,6 +24,7 @@ public class ContentService {
         .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + id));
   }
 
+  @Transactional(readOnly = true)
   public Optional<ContentDetailDto> getNextEpisode(UUID contentId) {
     final Content current =
         contentRepository

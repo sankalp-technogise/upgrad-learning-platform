@@ -92,6 +92,17 @@ export const VideoPlayer = ({
     }
   }, [initialTime])
 
+  useEffect(() => {
+    if (
+      videoRef.current &&
+      initialTime !== undefined &&
+      initialTime > 0 &&
+      videoRef.current.readyState >= 1
+    ) {
+      videoRef.current.currentTime = initialTime
+    }
+  }, [initialTime])
+
   const handleSeek = (_: Event, value: number | number[]) => {
     if (videoRef.current && typeof value === 'number') {
       videoRef.current.currentTime = value
