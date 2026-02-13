@@ -3,7 +3,7 @@ import { PlayerPage } from './PlayerPage'
 import { contentApi } from './api/contentApi'
 import { watchProgressApi } from './api/watchProgressApi'
 import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
-import { useParams, useNavigate } from '@tanstack/react-router'
+import { useParams, useNavigate, useSearch } from '@tanstack/react-router'
 import '@testing-library/jest-dom'
 
 vi.mock('./api/contentApi', () => ({
@@ -31,6 +31,7 @@ vi.mock('./components/VideoPlayer', () => ({
 vi.mock('@tanstack/react-router', () => ({
   useParams: vi.fn(),
   useNavigate: vi.fn(),
+  useSearch: vi.fn(),
 }))
 
 describe('PlayerPage', () => {
@@ -52,6 +53,7 @@ describe('PlayerPage', () => {
     vi.clearAllMocks()
     ;(useParams as Mock).mockReturnValue({ contentId: '123' })
     ;(useNavigate as Mock).mockReturnValue(mockNavigate)
+    ;(useSearch as Mock).mockReturnValue({ resume: undefined })
   })
 
   it('shows loading state initially', () => {
@@ -102,7 +104,8 @@ describe('PlayerPage', () => {
     })
   })
 
-  it('redirects to next episode when completed episode is reopened', async () => {
+  it('redirects to next episode when resume is true and episode is completed', async () => {
+    ;(useSearch as Mock).mockReturnValue({ resume: true })
     ;(contentApi.getContent as Mock).mockResolvedValue(mockContent)
     ;(watchProgressApi.getProgress as Mock).mockResolvedValue({
       contentId: '123',
@@ -122,11 +125,31 @@ describe('PlayerPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith({
         to: '/watch/$contentId',
         params: { contentId: '456' },
+        search: { resume: true },
       })
     })
   })
 
-  it('shows current content when completed but no next episode exists', async () => {
+  it('renders completed episode player when resume is not set', async () => {
+    ;(useSearch as Mock).mockReturnValue({ resume: undefined })
+    ;(contentApi.getContent as Mock).mockResolvedValue(mockContent)
+    ;(watchProgressApi.getProgress as Mock).mockResolvedValue({
+      contentId: '123',
+      progressPercent: 100,
+      lastWatchedPosition: 60,
+    })
+
+    render(<PlayerPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('video-player')).toBeInTheDocument()
+    })
+    expect(contentApi.getNextEpisode).not.toHaveBeenCalled()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('shows current content when resume is true, completed, but no next episode exists', async () => {
+    ;(useSearch as Mock).mockReturnValue({ resume: true })
     ;(contentApi.getContent as Mock).mockResolvedValue(mockContent)
     ;(watchProgressApi.getProgress as Mock).mockResolvedValue({
       contentId: '123',

@@ -82,6 +82,7 @@ export function ContinueWatchingSection({ item }: ContinueWatchingSectionProps) 
         <Link
           to="/watch/$contentId"
           params={{ contentId: item.contentId }}
+          search={{ resume: true }}
           style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}
         >
           <CardMedia

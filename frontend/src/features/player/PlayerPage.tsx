@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useParams, useNavigate } from '@tanstack/react-router'
+import { useParams, useNavigate, useSearch } from '@tanstack/react-router'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { contentApi, type ContentDetail } from './api/contentApi'
 import { watchProgressApi } from './api/watchProgressApi'
@@ -18,8 +18,27 @@ const getCsrfToken = (): string | null => {
   return decodeURIComponent(xsrfCookie.slice(eqIndex + 1))
 }
 
+const sendKeepaliveProgress = (targetContentId: string, event: ProgressUpdateEvent): void => {
+  const csrfToken = getCsrfToken()
+  fetch(`${API_BASE_URL}/watch-progress`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
+    },
+    body: JSON.stringify({
+      contentId: targetContentId,
+      progressPercent: event.progressPercent,
+      lastWatchedPosition: Math.floor(event.currentTime),
+    }),
+    keepalive: true,
+    credentials: 'include',
+  })
+}
+
 export const PlayerPage = () => {
   const { contentId } = useParams({ from: '/watch/$contentId' })
+  const { resume } = useSearch({ from: '/watch/$contentId' })
   const navigate = useNavigate()
   const [content, setContent] = useState<ContentDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -68,10 +87,14 @@ export const PlayerPage = () => {
           watchProgressApi.getProgress(contentId).catch(() => null),
         ])
 
-        if (progressData && progressData.progressPercent >= 100) {
+        if (progressData && progressData.progressPercent >= 100 && resume) {
           const nextEpisode = await contentApi.getNextEpisode(contentId)
           if (nextEpisode) {
-            navigate({ to: '/watch/$contentId', params: { contentId: nextEpisode.id } })
+            navigate({
+              to: '/watch/$contentId',
+              params: { contentId: nextEpisode.id },
+              search: { resume: true },
+            })
             return
           }
         }
@@ -97,22 +120,7 @@ export const PlayerPage = () => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (latestProgressRef.current && contentId) {
-        const event = latestProgressRef.current
-        const csrfToken = getCsrfToken()
-        fetch(`${API_BASE_URL}/watch-progress`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
-          },
-          body: JSON.stringify({
-            contentId,
-            progressPercent: event.progressPercent,
-            lastWatchedPosition: Math.floor(event.currentTime),
-          }),
-          keepalive: true,
-          credentials: 'include',
-        })
+        sendKeepaliveProgress(contentId, latestProgressRef.current)
       }
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -121,13 +129,12 @@ export const PlayerPage = () => {
 
   useEffect(() => {
     const capturedContentId = contentId
-    const capturedSaveProgress = saveProgress
     return () => {
       if (latestProgressRef.current && capturedContentId) {
-        capturedSaveProgress(latestProgressRef.current)
+        sendKeepaliveProgress(capturedContentId, latestProgressRef.current)
       }
     }
-  }, [contentId, saveProgress])
+  }, [contentId])
 
   if (loading) {
     return (
