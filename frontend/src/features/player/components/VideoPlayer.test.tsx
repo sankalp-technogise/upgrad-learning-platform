@@ -49,5 +49,12 @@ describe('VideoPlayer', () => {
     })
   })
 
-  // Add more tests for volume, fullscreen, etc.
+  it('calls onEnded when video ended event fires', () => {
+    const onEnded = vi.fn()
+    render(<VideoPlayer {...defaultProps} onEnded={onEnded} />)
+    const video = screen.getByTestId('video-element')
+
+    fireEvent.ended(video)
+    expect(onEnded).toHaveBeenCalledTimes(1)
+  })
 })

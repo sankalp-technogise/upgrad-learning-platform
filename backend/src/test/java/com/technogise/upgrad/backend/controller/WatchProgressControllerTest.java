@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.technogise.upgrad.backend.config.SecurityConfig;
+import com.technogise.upgrad.backend.dto.EpisodeFeedbackRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressResponse;
 import com.technogise.upgrad.backend.entity.User;
@@ -150,5 +151,38 @@ class WatchProgressControllerTest {
     mockMvc
         .perform(get("/api/watch-progress/" + contentId).with(csrf()))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldSaveFeedbackForAuthenticatedUser() throws Exception {
+    setupAuthenticatedUser();
+    UUID contentId = UUID.randomUUID();
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "HELPFUL");
+
+    when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+
+    mockMvc
+        .perform(
+            put("/api/watch-progress/feedback")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk());
+
+    verify(watchProgressService).saveFeedback(eq(TEST_USER_ID), any(EpisodeFeedbackRequest.class));
+  }
+
+  @Test
+  void shouldRejectUnauthenticatedFeedback() throws Exception {
+    UUID contentId = UUID.randomUUID();
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "NOT_HELPFUL");
+
+    mockMvc
+        .perform(
+            put("/api/watch-progress/feedback")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isForbidden());
   }
 }

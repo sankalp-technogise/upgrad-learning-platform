@@ -24,6 +24,7 @@ interface VideoPlayerProps {
   muted?: boolean
   initialTime?: number
   onProgressUpdate?: (event: ProgressUpdateEvent) => void
+  onEnded?: () => void
 }
 
 const formatTime = (time: number) => {
@@ -41,6 +42,7 @@ export const VideoPlayer = ({
   muted: initialMuted,
   initialTime,
   onProgressUpdate,
+  onEnded,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -210,6 +212,7 @@ export const VideoPlayer = ({
         onLoadedMetadata={handleLoadedMetadata}
         onPlay={onPlay}
         onPause={onPause}
+        onEnded={onEnded}
         onClick={handlePlayPause}
       />
 

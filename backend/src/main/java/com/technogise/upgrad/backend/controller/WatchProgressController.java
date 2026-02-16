@@ -1,5 +1,6 @@
 package com.technogise.upgrad.backend.controller;
 
+import com.technogise.upgrad.backend.dto.EpisodeFeedbackRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressResponse;
 import com.technogise.upgrad.backend.entity.User;
@@ -31,6 +32,14 @@ public class WatchProgressController {
       Authentication authentication, @Valid @RequestBody WatchProgressRequest request) {
     final User user = resolveUser(authentication);
     watchProgressService.saveProgress(user.getId(), request);
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping("/feedback")
+  public ResponseEntity<Void> saveFeedback(
+      Authentication authentication, @Valid @RequestBody EpisodeFeedbackRequest request) {
+    final User user = resolveUser(authentication);
+    watchProgressService.saveFeedback(user.getId(), request);
     return ResponseEntity.ok().build();
   }
 

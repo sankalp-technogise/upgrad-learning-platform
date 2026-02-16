@@ -3,6 +3,7 @@ package com.technogise.upgrad.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.technogise.upgrad.backend.dto.EpisodeFeedbackRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressResponse;
 import com.technogise.upgrad.backend.entity.Content;
@@ -154,5 +155,39 @@ class WatchProgressServiceTest {
 
     assertThrows(
         ResourceNotFoundException.class, () -> watchProgressService.saveProgress(userId, request));
+  }
+
+  @Test
+  void shouldSaveFeedbackOnExistingWatchHistory() {
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "HELPFUL");
+
+    WatchHistory existing =
+        WatchHistory.builder()
+            .id(UUID.randomUUID())
+            .user(testUser)
+            .content(testContent)
+            .progressPercent(100)
+            .lastWatchedPosition(600)
+            .lastWatchedAt(LocalDateTime.now())
+            .build();
+
+    when(watchHistoryRepository.findByUserIdAndContentId(userId, contentId))
+        .thenReturn(Optional.of(existing));
+
+    watchProgressService.saveFeedback(userId, request);
+
+    verify(watchHistoryRepository).save(existing);
+    assertEquals("HELPFUL", existing.getFeedback());
+  }
+
+  @Test
+  void shouldThrowWhenNoWatchHistoryForFeedback() {
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "NOT_HELPFUL");
+
+    when(watchHistoryRepository.findByUserIdAndContentId(userId, contentId))
+        .thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> watchProgressService.saveFeedback(userId, request));
   }
 }

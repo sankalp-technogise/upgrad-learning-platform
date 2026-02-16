@@ -26,4 +26,8 @@ export const watchProgressApi = {
     if (status === 204) return null
     return data
   },
+
+  saveFeedback: async (contentId: string, feedback: 'HELPFUL' | 'NOT_HELPFUL'): Promise<void> => {
+    await apiClient.put('/watch-progress/feedback', { contentId, feedback })
+  },
 }
