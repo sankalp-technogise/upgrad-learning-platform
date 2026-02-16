@@ -85,7 +85,7 @@ public class WatchProgressService {
                     new ResourceNotFoundException(
                         "No watch history found for content: " + request.contentId()));
 
-    history.setFeedback(request.feedback());
+    history.setFeedback(request.feedback().name());
     watchHistoryRepository.save(history);
   }
 }

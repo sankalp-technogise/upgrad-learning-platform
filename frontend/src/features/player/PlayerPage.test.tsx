@@ -44,7 +44,14 @@ vi.mock('./components/VideoPlayer', () => ({
 }))
 
 vi.mock('./components/FeedbackModal', () => ({
-  FeedbackModal: ({ open, onSubmit }: { open: boolean; onSubmit: (helpful: boolean) => void }) =>
+  FeedbackModal: ({
+    open,
+    onSubmit,
+  }: {
+    open: boolean
+    onSubmit: (helpful: boolean) => void
+    onDismiss?: () => void
+  }) =>
     open ? (
       <div data-testid="feedback-modal">
         <button onClick={() => onSubmit(true)}>Yes</button>
@@ -272,5 +279,40 @@ describe('PlayerPage', () => {
       expect(screen.getAllByText('Test Video').length).toBeGreaterThanOrEqual(1)
       expect(screen.getByText('Desc')).toBeInTheDocument()
     })
+  })
+
+  it('keeps feedback modal open when saving feedback fails', async () => {
+    const user = userEvent.setup()
+    ;(contentApi.getContent as Mock).mockResolvedValue(mockContent)
+    ;(watchProgressApi.getProgress as Mock).mockResolvedValue(null)
+    ;(watchProgressApi.saveProgress as Mock).mockResolvedValue(undefined)
+    ;(watchProgressApi.saveFeedback as Mock).mockRejectedValue(new Error('Network error'))
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    render(<PlayerPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('video-player')).toBeInTheDocument()
+    })
+
+    act(() => {
+      capturedOnEnded?.()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('feedback-modal')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Yes' }))
+
+    await waitFor(() => {
+      expect(watchProgressApi.saveFeedback).toHaveBeenCalledWith('123', 'HELPFUL')
+    })
+
+    expect(screen.getByTestId('feedback-modal')).toBeInTheDocument()
+    expect(consoleErrorSpy).toHaveBeenCalled()
+
+    consoleErrorSpy.mockRestore()
   })
 })

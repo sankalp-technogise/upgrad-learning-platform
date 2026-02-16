@@ -1,15 +1,35 @@
+import { useEffect, useCallback } from 'react'
 import { Box, Typography, Button, Paper } from '@mui/material'
 
 interface FeedbackModalProps {
   open: boolean
   onSubmit: (helpful: boolean) => void
+  onDismiss?: () => void
 }
 
-export const FeedbackModal = ({ open, onSubmit }: FeedbackModalProps) => {
+export const FeedbackModal = ({ open, onSubmit, onDismiss }: FeedbackModalProps) => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onDismiss) {
+        onDismiss()
+      }
+    },
+    [onDismiss]
+  )
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open, handleKeyDown])
+
   if (!open) return null
 
   return (
     <Box
+      role="dialog"
+      aria-labelledby="feedback-title"
       sx={{
         position: 'absolute',
         bottom: '15%',
@@ -28,7 +48,7 @@ export const FeedbackModal = ({ open, onSubmit }: FeedbackModalProps) => {
           minWidth: 280,
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography id="feedback-title" variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
           Did you like this video?
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>

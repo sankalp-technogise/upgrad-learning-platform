@@ -86,13 +86,14 @@ export const PlayerPage = () => {
   }, [contentId, content?.durationSeconds, saveProgress])
 
   const handleFeedbackSubmit = useCallback(
-    (helpful: boolean) => {
-      if (contentId) {
-        watchProgressApi
-          .saveFeedback(contentId, helpful ? 'HELPFUL' : 'NOT_HELPFUL')
-          .catch((err) => console.error('Failed to save feedback:', err))
+    async (helpful: boolean) => {
+      if (!contentId) return
+      try {
+        await watchProgressApi.saveFeedback(contentId, helpful ? 'HELPFUL' : 'NOT_HELPFUL')
+        setShowFeedback(false)
+      } catch (err) {
+        console.error('Failed to save feedback:', err)
       }
-      setShowFeedback(false)
     },
     [contentId]
   )
@@ -136,7 +137,7 @@ export const PlayerPage = () => {
     if (contentId) {
       fetchContentAndProgress()
     }
-  }, [contentId, navigate])
+  }, [contentId, navigate, resume])
 
   useEffect(() => {
     const handleBeforeUnload = () => {

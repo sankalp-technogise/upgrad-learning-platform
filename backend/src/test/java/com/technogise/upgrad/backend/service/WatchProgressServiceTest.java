@@ -3,6 +3,7 @@ package com.technogise.upgrad.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.technogise.upgrad.backend.constants.Feedback;
 import com.technogise.upgrad.backend.dto.EpisodeFeedbackRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressResponse;
@@ -159,7 +160,7 @@ class WatchProgressServiceTest {
 
   @Test
   void shouldSaveFeedbackOnExistingWatchHistory() {
-    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "HELPFUL");
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, Feedback.HELPFUL);
 
     WatchHistory existing =
         WatchHistory.builder()
@@ -181,8 +182,33 @@ class WatchProgressServiceTest {
   }
 
   @Test
+  void shouldUpdateFeedbackWhenUserChangesMind() {
+    WatchHistory existing =
+        WatchHistory.builder()
+            .id(UUID.randomUUID())
+            .user(testUser)
+            .content(testContent)
+            .progressPercent(100)
+            .lastWatchedPosition(600)
+            .lastWatchedAt(LocalDateTime.now())
+            .feedback("HELPFUL")
+            .build();
+
+    EpisodeFeedbackRequest updatedRequest =
+        new EpisodeFeedbackRequest(contentId, Feedback.NOT_HELPFUL);
+
+    when(watchHistoryRepository.findByUserIdAndContentId(userId, contentId))
+        .thenReturn(Optional.of(existing));
+
+    watchProgressService.saveFeedback(userId, updatedRequest);
+
+    verify(watchHistoryRepository).save(existing);
+    assertEquals("NOT_HELPFUL", existing.getFeedback());
+  }
+
+  @Test
   void shouldThrowWhenNoWatchHistoryForFeedback() {
-    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, "NOT_HELPFUL");
+    EpisodeFeedbackRequest request = new EpisodeFeedbackRequest(contentId, Feedback.NOT_HELPFUL);
 
     when(watchHistoryRepository.findByUserIdAndContentId(userId, contentId))
         .thenReturn(Optional.empty());
