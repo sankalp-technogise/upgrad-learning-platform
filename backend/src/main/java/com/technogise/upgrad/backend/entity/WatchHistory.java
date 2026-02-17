@@ -54,4 +54,8 @@ public class WatchHistory {
   @Builder.Default
   @Setter
   private LocalDateTime lastWatchedAt = LocalDateTime.now();
+
+  @Column(name = "feedback")
+  @Setter
+  private String feedback;
 }

@@ -4,6 +4,7 @@ import { Box, Typography, CircularProgress } from '@mui/material'
 import { contentApi, type ContentDetail } from './api/contentApi'
 import { watchProgressApi } from './api/watchProgressApi'
 import { VideoPlayer, type ProgressUpdateEvent } from './components/VideoPlayer'
+import { FeedbackModal } from './components/FeedbackModal'
 
 const SAVE_INTERVAL_MS = 5000
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
@@ -44,6 +45,7 @@ export const PlayerPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [initialTime, setInitialTime] = useState<number | undefined>(undefined)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const lastSaveTimeRef = useRef(0)
   const latestProgressRef = useRef<ProgressUpdateEvent | null>(null)
@@ -74,6 +76,26 @@ export const PlayerPage = () => {
       }
     },
     [saveProgress]
+  )
+
+  const handleVideoEnded = useCallback(() => {
+    if (!contentId) return
+    const videoDuration = content?.durationSeconds ?? 0
+    saveProgress({ currentTime: videoDuration, duration: videoDuration, progressPercent: 100 })
+    setShowFeedback(true)
+  }, [contentId, content?.durationSeconds, saveProgress])
+
+  const handleFeedbackSubmit = useCallback(
+    async (helpful: boolean) => {
+      if (!contentId) return
+      try {
+        await watchProgressApi.saveFeedback(contentId, helpful ? 'HELPFUL' : 'NOT_HELPFUL')
+        setShowFeedback(false)
+      } catch (err) {
+        console.error('Failed to save feedback:', err)
+      }
+    },
+    [contentId]
   )
 
   useEffect(() => {
@@ -115,7 +137,7 @@ export const PlayerPage = () => {
     if (contentId) {
       fetchContentAndProgress()
     }
-  }, [contentId, navigate])
+  }, [contentId, navigate, resume])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -170,17 +192,40 @@ export const PlayerPage = () => {
   }
 
   return (
-    <Box sx={{ width: '100vw', height: '100vh', bgcolor: 'black' }}>
-      <VideoPlayer
-        src={content.videoUrl}
-        poster={content.thumbnailUrl}
-        title={content.title}
-        episodeNumber={content.episodeNumber}
-        duration={content.durationSeconds}
-        initialTime={initialTime}
-        onProgressUpdate={handleProgressUpdate}
-        muted
-      />
+    <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#bdbdbd' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: 900,
+          mx: 'auto',
+          mt: 4,
+          aspectRatio: '16/9',
+        }}
+      >
+        <VideoPlayer
+          src={content.videoUrl}
+          poster={content.thumbnailUrl}
+          title={content.title}
+          episodeNumber={content.episodeNumber}
+          duration={content.durationSeconds}
+          initialTime={initialTime}
+          onProgressUpdate={handleProgressUpdate}
+          onEnded={handleVideoEnded}
+          muted
+        />
+        <FeedbackModal open={showFeedback} onSubmit={handleFeedbackSubmit} />
+      </Box>
+      <Box sx={{ maxWidth: 900, mx: 'auto', mt: 2, px: 2, pb: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#212121' }}>
+          {content.title}
+        </Typography>
+        {content.description && (
+          <Typography variant="body2" sx={{ color: '#757575', mt: 0.5 }}>
+            {content.description}
+          </Typography>
+        )}
+      </Box>
     </Box>
   )
 }

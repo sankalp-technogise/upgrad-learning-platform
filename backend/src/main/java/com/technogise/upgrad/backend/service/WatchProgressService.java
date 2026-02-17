@@ -1,5 +1,6 @@
 package com.technogise.upgrad.backend.service;
 
+import com.technogise.upgrad.backend.dto.EpisodeFeedbackRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressRequest;
 import com.technogise.upgrad.backend.dto.WatchProgressResponse;
 import com.technogise.upgrad.backend.entity.Content;
@@ -71,5 +72,20 @@ public class WatchProgressService {
             wh ->
                 new WatchProgressResponse(
                     wh.getContent().getId(), wh.getProgressPercent(), wh.getLastWatchedPosition()));
+  }
+
+  @Transactional
+  public void saveFeedback(
+      @NonNull final UUID userId, @NonNull final EpisodeFeedbackRequest request) {
+    final WatchHistory history =
+        watchHistoryRepository
+            .findByUserIdAndContentId(userId, request.contentId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "No watch history found for content: " + request.contentId()));
+
+    history.setFeedback(request.feedback().name());
+    watchHistoryRepository.save(history);
   }
 }
